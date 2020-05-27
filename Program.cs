@@ -6,7 +6,7 @@ namespace ChromaBoy
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            new Emulator().Run();
         }
     }
 }
