@@ -4,8 +4,12 @@ using System.Text;
 
 namespace ChromaBoy.Hardware
 {
-    class MemoryBankController
+    public abstract  class MemoryBankController
     {
-        // TODO: Implement Abstract Properties
+        public abstract bool IsAddressWritable(int address);
+        public abstract bool IsAddressReadable(int address);
+        public abstract bool AccessesROM(int address);
+        public abstract bool HandleWrite(int address, byte value);
+        public abstract int TranslateAddress(int address);
     }
 }

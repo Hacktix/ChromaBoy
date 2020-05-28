@@ -88,7 +88,7 @@ namespace ChromaBoy.Hardware
         {
             // TODO: Implement selection of MBCs for cartridge type
 
-            return new MemoryBankController();
+            return null;
         }
     }
 }
