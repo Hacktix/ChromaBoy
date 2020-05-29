@@ -12,5 +12,10 @@ namespace ChromaBoy
         {
             Window.GoWindowed((ushort)(SCREEN_WIDTH * SCALE_FACTOR), (ushort)(SCREEN_HEIGHT * SCALE_FACTOR));
         }
+
+        public Emulator(byte[] ROM) : this()
+        {
+            // TODO: Implement automatic ROM Loading
+        }
     }
 }
