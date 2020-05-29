@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ChromaBoy.Hardware.MBCs
+﻿namespace ChromaBoy.Hardware.MBCs
 {
     class NoMBC : MemoryBankController
     {
