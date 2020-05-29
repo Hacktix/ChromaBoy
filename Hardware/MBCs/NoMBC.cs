@@ -21,7 +21,7 @@
 
         public override bool IsAddressWritable(int address)
         {
-            return address >= 0x8000 && !(address >= 0xFEA0 && address <= 0xFEFF);
+            return address >= 0x8000;
         }
 
         public override int TranslateAddress(int address)
