@@ -18,6 +18,9 @@ namespace ChromaBoy.Hardware
         public ushort PC = 0;
         public ushort SP = 0;
 
+        public bool InterruptsEnabled = false;
+        public long CycleCount = 0;
+
         public void EmulateCycles(long cycleLimit)
         {
             long cycleCounter = cycleLimit;
@@ -25,6 +28,8 @@ namespace ChromaBoy.Hardware
             while (cycleCounter-- > 0)
             {
                 // TODO: Emulate CPU Cycle
+
+                CycleCount++;
             }
         }
 
