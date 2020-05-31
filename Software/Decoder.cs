@@ -18,6 +18,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111111) == 0b00001000) return new LDMSP(parent);
             else if ((code & 0b11111111) == 0b11111001) return new LDSPHL(parent);
             else if ((code & 0b11001111) == 0b11000101) return new PUSH(parent, code);
+            else if ((code & 0b11001111) == 0b11000001) return new POP(parent, code);
             throw new NotImplementedException();
         }
     }
