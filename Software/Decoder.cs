@@ -14,9 +14,10 @@ namespace ChromaBoy.Software
             else if ((code & 0b11101111) == 0b11101010) return new LDAI(parent, code);
             else if ((code & 0b11101101) == 0b11100000) return new LDH(parent, code);
             else if ((code & 0b11100111) == 0b00100010) return new LDAHL(parent, code);
-            else if ((code & 0b11001111) == 0b00000001) return new LD16(parent, code);
+            else if ((code & 0b11001111) == 0b00000001) return new PUSH(parent, code);
             else if ((code & 0b11111111) == 0b00001000) return new LDMSP(parent);
             else if ((code & 0b11111111) == 0b11111001) return new LDSPHL(parent);
+            else if ((code & 0b11001111) == 0b11000101) return new PUSH(parent, code);
             throw new NotImplementedException();
         }
     }
