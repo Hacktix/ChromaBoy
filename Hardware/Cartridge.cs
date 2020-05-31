@@ -5,7 +5,7 @@ namespace ChromaBoy.Hardware
 {
     public enum ColorSupportMode { NoColor, SupportsColor, ColorOnly }
 
-    class Cartridge
+    public class Cartridge
     {
         public string Title = "";
         public string ManufacturerCode = "";

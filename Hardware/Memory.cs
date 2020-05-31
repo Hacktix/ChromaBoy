@@ -1,6 +1,6 @@
 ﻿namespace ChromaBoy.Hardware
 {
-    class Memory
+    public class Memory
     {
         private MemoryBankController MBC;
         private byte[] ROM;

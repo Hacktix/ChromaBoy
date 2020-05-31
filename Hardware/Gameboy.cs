@@ -8,7 +8,7 @@ namespace ChromaBoy.Hardware
     public enum Register16 { AF, BC, DE, HL, SP, PC }
     public enum Flag { Zero = 0b10000000, AddSub = 0b1000000, HalfCarry = 0b100000, Carry = 0b10000 }
 
-    class Gameboy
+    public class Gameboy
     {
         public Memory Memory;
         public Cartridge Cartridge;
