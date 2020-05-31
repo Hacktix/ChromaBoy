@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChromaBoy.Hardware
 {
-    public enum Register { A, F, B, C, D, E, H, L }
+    public enum Register { A, F, B, C, D, E, H, L, M }
     public enum Register16 { AF, BC, DE, HL, SP, PC }
     public enum Flag { Zero = 0b10000000, AddSub = 0b1000000, HalfCarry = 0b100000, Carry = 0b10000 }
 
