@@ -13,6 +13,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11100111) == 0b00000010) return new LDA(parent, code);
             else if ((code & 0b11101111) == 0b11101010) return new LDAI(parent, code);
             else if ((code & 0b11101101) == 0b11100000) return new LDH(parent, code);
+            else if ((code & 0b11100111) == 0b00100010) return new LDAHL(parent, code);
             throw new NotImplementedException();
         }
     }
