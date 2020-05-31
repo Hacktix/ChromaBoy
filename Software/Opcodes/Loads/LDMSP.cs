@@ -2,13 +2,9 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class LD16 : Opcode // LD rr, nn
+    public class LDMSP : Opcode // LD (nn), SP
     {
-        private Register16 target;
-
-        public LD16(Gameboy parent, byte opcode) : base(parent) {
-            target = OpcodeUtils.BitsToRegister16((opcode & 0b110000) >> 4);
-
+        public LDMSP(Gameboy parent) : base(parent) {
             Cycles = 12;
             Length = 3;
         }
@@ -16,7 +12,7 @@ namespace ChromaBoy.Software.Opcodes
         public override void Execute()
         {
             ushort srcVal = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8));
-            parent.WriteRegister16(target, srcVal);
+            parent.WriteRegister16(Register16.SP, srcVal);
         }
     }
 }
