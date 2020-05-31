@@ -5,7 +5,7 @@ namespace ChromaBoy.Software.Opcodes
     public class LDMSP : Opcode // LD (nn), SP
     {
         public LDMSP(Gameboy parent) : base(parent) {
-            Cycles = 12;
+            Cycles = 20;
             Length = 3;
         }
 
