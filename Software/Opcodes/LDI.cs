@@ -2,21 +2,20 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class LD : Opcode // LD r, r
+    public class LDI : Opcode // LD r, n
     {
-        private Register source;
         private Register target;
 
-        public LD(Gameboy parent, byte opcode) : base(parent) {
-            source = OpcodeUtils.BitsToRegister(opcode & 0b111);
+        public LDI(Gameboy parent, byte opcode) : base(parent) {
             target = OpcodeUtils.BitsToRegister((opcode & 0b111000) >> 3);
 
-            Cycles = target == Register.M ? 8 : 4;
+            Cycles = target == Register.M ? 12 : 8;
+            Length = 2;
         }
 
         public override void Execute()
         {
-            byte srcVal = (source == Register.M) ? parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] : parent.Registers[source];
+            byte srcVal = parent.Memory[parent.PC + 1];
             if (target == Register.M)
                 parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] = srcVal;
             else
