@@ -19,5 +19,17 @@ namespace ChromaBoy.Software.Opcodes
                 default: return Register.A;
             }
         }
+
+        public static Register16 BitsToRegister16(int bits)
+        {
+            switch (bits)
+            {
+                case 0b00: return Register16.BC;
+                case 0b01: return Register16.DE;
+                case 0b10: return Register16.HL;
+                case 0b11: return Register16.SP;
+                default: return Register16.SP;
+            }
+        }
     }
 }
