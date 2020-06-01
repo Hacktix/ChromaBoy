@@ -2,10 +2,10 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class ADDSP : Opcode // ADD SP, e
+    public class LDHLSP : Opcode // LD HL, SP+e
     {
-        public ADDSP(Gameboy parent) : base(parent) {
-            Cycles = 16;
+        public LDHLSP(Gameboy parent) : base(parent) {
+            Cycles = 12;
             Length = 2;
         }
 
@@ -17,7 +17,7 @@ namespace ChromaBoy.Software.Opcodes
 
             if ((addByte & 128) > 0) addVal = ~(addByte & 0x7F);
             else addVal = addByte & 0x7F;
-            parent.WriteRegister16(Register16.SP, (ushort)(orgVal + addVal));
+            parent.WriteRegister16(Register16.HL, (ushort)(orgVal + addVal));
 
             // Set Flags
             parent.SetFlag(Flag.Zero, false);
