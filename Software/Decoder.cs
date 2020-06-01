@@ -13,6 +13,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111000) == 0b00110000) return new SWAP(parent, code);
             else if ((code & 0b11111000) == 0b00111000) return new PSL(parent, code);
             else if ((code & 0b11000000) == 0b01000000) return new BIT(parent, code);
+            else if ((code & 0b11000000) == 0b10000000) return new RES(parent, code);
             throw new NotImplementedException();
         }
 
