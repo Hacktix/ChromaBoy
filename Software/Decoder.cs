@@ -31,6 +31,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11000111) == 0b00000100) return new INC(parent, code);
             else if ((code & 0b11000111) == 0b00000101) return new DEC(parent, code);
             else if ((code & 0b11111111) == 0b00100111) return new DAA(parent);
+            else if ((code & 0b11111111) == 0b00101111) return new CPL(parent);
             throw new NotImplementedException();
         }
     }
