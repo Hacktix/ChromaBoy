@@ -35,6 +35,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111000) == 0b10100000) return new AND(parent, code);
             else if ((code & 0b11111111) == 0b11100110) return new ANDI(parent);
             else if ((code & 0b11111000) == 0b10101000) return new XOR(parent, code);
+            else if ((code & 0b11111111) == 0b11101110) return new XORI(parent);
             throw new NotImplementedException();
         }
     }
