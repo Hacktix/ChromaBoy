@@ -59,6 +59,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11100111) == 0b00100000) return new CJR(parent, code);
             else if ((code & 0b11111111) == 0b11001101) return new CALL(parent);
             else if ((code & 0b11100111) == 0b11000100) return new CCALL(parent, code);
+            else if ((code & 0b11101111) == 0b11001001) return new RET(parent, code);
             throw new NotImplementedException();
         }
     }
