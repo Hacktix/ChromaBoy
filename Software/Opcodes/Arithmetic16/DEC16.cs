@@ -2,11 +2,11 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class INC16 : Opcode // INC rr
+    public class DEC16 : Opcode // DEC rr
     {
         private Register16 target;
 
-        public INC16(Gameboy parent, byte opcode) : base(parent) {
+        public DEC16(Gameboy parent, byte opcode) : base(parent) {
             target = OpcodeUtils.BitsToRegister16((opcode & 0b1110000) >> 4);
 
             Cycles = 8;
@@ -14,7 +14,7 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            parent.WriteRegister16(target, (ushort)(parent.ReadRegister16(target) + 1));
+            parent.WriteRegister16(target, (ushort)(parent.ReadRegister16(target) - 1));
         }
     }
 }

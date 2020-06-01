@@ -42,6 +42,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111111) == 0b11111110) return new CPI(parent);
             else if ((code & 0b11000111) == 0b00000001) return new ADD16(parent, code);
             else if ((code & 0b11001111) == 0b00000011) return new INC16(parent, code);
+            else if ((code & 0b11001111) == 0b00001011) return new DEC16(parent, code);
             throw new NotImplementedException();
         }
     }
