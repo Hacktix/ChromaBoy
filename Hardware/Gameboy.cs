@@ -17,7 +17,7 @@ namespace ChromaBoy.Hardware
 
         public Dictionary<Register, byte> Registers = new Dictionary<Register, byte>()
         { { Register.A, 0 }, { Register.F, 2 }, { Register.B, 0 }, { Register.C, 0 }, { Register.D, 0 }, { Register.E, 0 }, { Register.H, 0 }, { Register.L, 0 }, };
-        public ushort PC = 0;
+        public ushort PC = 0x100;
         public ushort SP = 0;
 
         public bool Halted = false;
@@ -31,6 +31,17 @@ namespace ChromaBoy.Hardware
         {
             Cartridge = new Cartridge(ROM);
             Memory = new Memory(Cartridge.MemoryBankController, ROM);
+
+            DebugInit();
+        }
+
+        private void DebugInit()
+        {
+            WriteRegister16(Register16.AF, 0x01B0);
+            WriteRegister16(Register16.BC, 0x0013);
+            WriteRegister16(Register16.DE, 0x00D8);
+            WriteRegister16(Register16.HL, 0x014D);
+            SP = 0xFFFE;
         }
 
         public void EmulateCycles(long cycleLimit)
@@ -52,6 +63,7 @@ namespace ChromaBoy.Hardware
                 }
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
+                Console.WriteLine("Executing " + Memory[PC].ToString("X2") + " at " + PC.ToString("X4") + ": " + opcode);
                 opcode.Execute();
                 PC += (ushort)opcode.Length;
                 CycleCooldown = opcode.Cycles - 1;
