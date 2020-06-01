@@ -54,6 +54,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111111) == 0b11111011) return new EI(parent);
             else if ((code & 0b11111111) == 0b11000011) return new JP(parent);
             else if ((code & 0b11111111) == 0b11101001) return new JPHL(parent);
+            else if ((code & 0b11100111) == 0b11000010) return new CJP(parent, code);
             throw new NotImplementedException();
         }
     }
