@@ -1,4 +1,5 @@
 ﻿using Chroma;
+using ChromaBoy.Hardware;
 
 namespace ChromaBoy
 {
@@ -8,6 +9,11 @@ namespace ChromaBoy
         public static readonly int SCREEN_HEIGHT = 144;
         public static readonly int SCALE_FACTOR = 4;
 
+        public static readonly int CYCLES_PER_UPDATE = 100000;
+        public static readonly int UPDATE_FREQUENCY = 1000 / (4194304 / CYCLES_PER_UPDATE);
+
+        private Gameboy Gameboy;
+
         public Emulator()
         {
             Window.GoWindowed((ushort)(SCREEN_WIDTH * SCALE_FACTOR), (ushort)(SCREEN_HEIGHT * SCALE_FACTOR));
@@ -15,7 +21,13 @@ namespace ChromaBoy
 
         public Emulator(byte[] ROM) : this()
         {
-            // TODO: Implement automatic ROM Loading
+            Gameboy = new Gameboy(ROM);
+            FixedUpdateFrequency = UPDATE_FREQUENCY;
+        }
+
+        protected override void FixedUpdate(float fixedDelta)
+        {
+            Gameboy.EmulateCycles(CYCLES_PER_UPDATE);
         }
     }
 }

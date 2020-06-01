@@ -1,4 +1,7 @@
-﻿namespace ChromaBoy.Hardware
+﻿using System;
+using System.Text;
+
+namespace ChromaBoy.Hardware
 {
     public class Memory
     {
@@ -24,10 +27,11 @@
                     else
                         return RAM[MBC.TranslateAddress(i)];
                 }
-                return 0;
+                return 0xFF;
             }
             set
             {
+                if(i == 0xFF01) Console.Write(Encoding.ASCII.GetString(new byte[] { value }));
                 if(MBC.IsAddressWritable(i))
                 {
                     if(MBC.HandleWrite(i, value))

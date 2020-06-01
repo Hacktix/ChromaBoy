@@ -2,7 +2,7 @@
 {
     class NoMBC : MemoryBankController
     {
-        public NoMBC(int RAMSize) : base(RAMSize, 0) { }
+        public NoMBC() : base(0, 0) { }
 
         public override bool AccessesROM(int address)
         {

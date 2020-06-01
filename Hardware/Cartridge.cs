@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChromaBoy.Hardware.MBCs;
+using System;
 using System.Text;
 
 namespace ChromaBoy.Hardware
@@ -71,7 +72,7 @@ namespace ChromaBoy.Hardware
 
             // Cartridge Type + MBC
             CartridgeType = ROM[0x0147];
-            InitializeMBC();
+            MemoryBankController = InitializeMBC();
 
             // Title + Manufacturer Code
             for(int i = 0x0134; i <= 0x0143; i++)
@@ -85,7 +86,7 @@ namespace ChromaBoy.Hardware
 
         private MemoryBankController InitializeMBC()
         {
-            // TODO: Implement selection of MBCs for cartridge type
+            if (CartridgeType == 0) return new NoMBC();
 
             return null;
         }

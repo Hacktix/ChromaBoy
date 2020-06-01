@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ChromaBoy.Software;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Decoder = ChromaBoy.Software.Decoder;
 
 namespace ChromaBoy.Hardware
 {
@@ -23,13 +25,36 @@ namespace ChromaBoy.Hardware
         public bool InterruptsEnabled = false;
         public long CycleCount = 0;
 
+        private int CycleCooldown = 0;
+
+        public Gameboy(byte[] ROM)
+        {
+            Cartridge = new Cartridge(ROM);
+            Memory = new Memory(Cartridge.MemoryBankController, ROM);
+        }
+
         public void EmulateCycles(long cycleLimit)
         {
             long cycleCounter = cycleLimit;
 
             while (cycleCounter-- > 0)
             {
-                // TODO: Emulate CPU Cycle
+                if(CycleCooldown > 0)
+                {
+                    CycleCooldown--;
+                    continue;
+                }
+
+                if (Halted)
+                {
+                    CycleCooldown += 4;
+                    continue;
+                }
+
+                Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
+                opcode.Execute();
+                PC += (ushort)opcode.Length;
+                CycleCooldown = opcode.Cycles - 1;
 
                 CycleCount++;
             }
