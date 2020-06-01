@@ -14,7 +14,7 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 # ToDo-List
 ```
 # Emulator Core
-[ ] CPU Emulation
+[✓] CPU Emulation
 [ ] GBC-Specific Features
 [ ] Memory Bank Controllers
 [✓] ROM Metadata decoding
