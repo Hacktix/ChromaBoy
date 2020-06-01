@@ -29,6 +29,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111000) == 0b10011000) return new SBC(parent, code);
             else if ((code & 0b11111111) == 0b11011110) return new SBCI(parent);
             else if ((code & 0b11000111) == 0b00000100) return new INC(parent, code);
+            else if ((code & 0b11000111) == 0b00000101) return new DEC(parent, code);
             throw new NotImplementedException();
         }
     }
