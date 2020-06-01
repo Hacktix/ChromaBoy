@@ -2,16 +2,16 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class SBI : Opcode // SUB A, n
+    public class SBCI : Opcode // SBC A, n
     {
-        public SBI(Gameboy parent) : base(parent) {
+        public SBCI(Gameboy parent) : base(parent) {
             Cycles = 8;
             Length = 2;
         }
 
         public override void Execute()
         {
-            byte orgVal = parent.Registers[Register.A];
+            byte orgVal = (byte)(parent.Registers[Register.A] - ((parent.Registers[Register.F] & (byte)Flag.Carry) > 0 ? 1 : 0));
             byte subVal = parent.Memory[parent.PC + 1];
             parent.Registers[Register.A] -= subVal;
 
