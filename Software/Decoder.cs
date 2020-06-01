@@ -21,6 +21,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11001111) == 0b11000001) return new POP(parent, code);
             else if ((code & 0b11111000) == 0b10000000) return new ADD(parent, code);
             else if ((code & 0b11111111) == 0b11000110) return new ADI(parent);
+            else if ((code & 0b11111000) == 0b10001000) return new ADC(parent, code);
             throw new NotImplementedException();
         }
     }
