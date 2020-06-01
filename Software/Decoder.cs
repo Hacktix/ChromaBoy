@@ -11,6 +11,7 @@ namespace ChromaBoy.Software
             if ((code & 0b11100000) == 0b00000000) return new PRT(parent, code);
             else if ((code & 0b11110000) == 0b00100000) return new PSA(parent, code);
             else if ((code & 0b11111000) == 0b00110000) return new SWAP(parent, code);
+            else if ((code & 0b11111000) == 0b00111000) return new PSL(parent, code);
             throw new NotImplementedException();
         }
 
