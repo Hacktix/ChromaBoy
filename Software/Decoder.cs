@@ -46,6 +46,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111111) == 0b11101000) return new ADDSP(parent);
             else if ((code & 0b11111111) == 0b11111000) return new LDHLSP(parent);
             else if ((code & 0b11100111) == 0b00000111) return new RTA(parent, code);
+            else if ((code & 0b11111111) == 0b00111111) return new CCF(parent);
             throw new NotImplementedException();
         }
     }
