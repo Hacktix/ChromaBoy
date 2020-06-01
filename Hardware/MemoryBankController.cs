@@ -1,6 +1,6 @@
 ﻿namespace ChromaBoy.Hardware
 {
-    public abstract  class MemoryBankController
+    public abstract class MemoryBankController
     {
         public int RAMSize;
         public int MemoryBanks;

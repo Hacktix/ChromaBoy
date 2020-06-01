@@ -86,9 +86,14 @@ namespace ChromaBoy.Hardware
 
         private MemoryBankController InitializeMBC()
         {
-            if (CartridgeType == 0) return new NoMBC();
-
-            return null;
+            switch(CartridgeType)
+            {
+                case 0: return new NoMBC();
+                case 1: return new MBC1(0, false);
+                case 2: return new MBC1(ExternalRAMSize, false);
+                case 3: return new MBC1(ExternalRAMSize, true);
+                default: throw new NotImplementedException();
+            }
         }
     }
 }

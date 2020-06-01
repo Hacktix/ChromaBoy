@@ -6,8 +6,8 @@ namespace ChromaBoy.Hardware
     public class Memory
     {
         private MemoryBankController MBC;
-        private byte[] ROM;
-        private byte[] RAM;
+        public byte[] ROM;
+        public byte[] RAM;
 
         public Memory(MemoryBankController MBC, byte[] ROM)
         {
@@ -32,9 +32,9 @@ namespace ChromaBoy.Hardware
             set
             {
                 if(i == 0xFF01) Console.Write(Encoding.ASCII.GetString(new byte[] { value }));
-                if(MBC.IsAddressWritable(i))
+                if(MBC.HandleWrite(i, value))
                 {
-                    if(MBC.HandleWrite(i, value))
+                    if(MBC.IsAddressWritable(i))
                     {
                         if (MBC.AccessesROM(i))
                             ROM[MBC.TranslateAddress(i)] = value;
