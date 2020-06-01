@@ -9,6 +9,7 @@ namespace ChromaBoy.Software
         private static Opcode DecodePrefixOpcode(Gameboy parent, byte code)
         {
             if ((code & 0b11100000) == 0b00000000) return new PRT(parent, code);
+            if ((code & 0b11110000) == 0b00100000) return new PSA(parent, code);
             throw new NotImplementedException();
         }
 
