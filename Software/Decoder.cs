@@ -6,8 +6,17 @@ namespace ChromaBoy.Software
 {
     class Decoder
     {
+        private static Opcode DecodePrefixOpcode(Gameboy parent, byte code)
+        {
+            if ((code & 0b11100000) == 0b00000000) return new PRT(parent, code);
+            throw new NotImplementedException();
+        }
+
         public static Opcode DecodeOpcode(Gameboy parent, byte code)
         {
+            // Hande 0xCB Prefixed Opcodes
+            if (code == 0xCB) return DecodePrefixOpcode(parent, parent.Memory[parent.PC + 1]);
+
             if ((code & 0b11111111) == 0b01110110) return new HALT(parent);
             else if ((code & 0b11111111) == 0b00010000) return new STOP(parent);
             else if ((code & 0b11000000) == 0b01000000) return new LD(parent, code);
