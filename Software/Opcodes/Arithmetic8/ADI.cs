@@ -19,7 +19,7 @@ namespace ChromaBoy.Software.Opcodes
             parent.SetFlag(Flag.AddSub, false);
             parent.SetFlag(Flag.Zero, ((byte)(orgVal + addVal)) == 0);
             parent.SetFlag(Flag.HalfCarry, (((orgVal & 0xF) + (addVal & 0xF)) & 0x10) == 0x10);
-            parent.SetFlag(Flag.Carry, orgVal + addVal > 0);
+            parent.SetFlag(Flag.Carry, orgVal + addVal > 255);
         }
     }
 }
