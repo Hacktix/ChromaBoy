@@ -19,6 +19,7 @@ namespace ChromaBoy.Hardware
         public ushort SP = 0;
 
         public bool Halted = false;
+        public bool Standby = false;
         public bool InterruptsEnabled = false;
         public long CycleCount = 0;
 
