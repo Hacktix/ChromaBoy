@@ -11,7 +11,7 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            parent.PC = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8));
+            parent.PC = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8) - 3);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace ChromaBoy.Software.Opcodes
             ushort stackval = (ushort)(parent.PC + 3);
             parent.Memory[parent.SP + 1] = (byte)((stackval & 0xFF00) >> 8);
             parent.Memory[parent.SP] = (byte)(stackval & 0xFF);
-            parent.PC = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8));
+            parent.PC = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8) - 3);
         }
     }
 }

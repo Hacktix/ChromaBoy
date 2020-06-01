@@ -15,7 +15,7 @@ namespace ChromaBoy.Software.Opcodes
         public override void Execute()
         {
             if (enableInt) parent.InterruptsEnabled = true;
-            parent.PC = (ushort)(parent.Memory[parent.SP] + (parent.Memory[parent.SP + 1] << 8));
+            parent.PC = (ushort)(parent.Memory[parent.SP] + (parent.Memory[parent.SP + 1] << 8) - 1);
             parent.SP += 2;
         }
     }

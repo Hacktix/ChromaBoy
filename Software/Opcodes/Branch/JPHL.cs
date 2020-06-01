@@ -10,7 +10,7 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            parent.PC = parent.ReadRegister16(Register16.HL);
+            parent.PC = (ushort)(parent.ReadRegister16(Register16.HL) - 1);
         }
     }
 }

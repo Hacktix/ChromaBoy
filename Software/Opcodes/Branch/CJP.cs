@@ -22,7 +22,7 @@ namespace ChromaBoy.Software.Opcodes
                 Cycles = 12;
                 return;
             }
-            parent.PC = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8));
+            parent.PC = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8) - 3);
         }
     }
 }
