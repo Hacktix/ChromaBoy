@@ -2,7 +2,7 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class CPL : Opcode // ADD A, r
+    public class CPL : Opcode // CPL
     {
         public CPL(Gameboy parent) : base(parent) {
         }
