@@ -2,20 +2,16 @@
 
 namespace ChromaBoy.Software.Opcodes
 {
-    public class SUB : Opcode // SUB A, r
+    public class SBI : Opcode // SUB A, n
     {
-        private Register source;
-
-        public SUB(Gameboy parent, byte opcode) : base(parent) {
-            source = OpcodeUtils.BitsToRegister(opcode & 0b111);
-
-            Cycles = source == Register.M ? 8 : 4;
+        public SBI(Gameboy parent) : base(parent) {
+            Cycles = 8;
         }
 
         public override void Execute()
         {
             byte orgVal = parent.Registers[Register.A];
-            byte subVal = (source == Register.M) ? parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] : parent.Registers[source];
+            byte subVal = parent.Memory[parent.PC + 1];
             parent.Registers[Register.A] -= subVal;
 
             // Set Flags
