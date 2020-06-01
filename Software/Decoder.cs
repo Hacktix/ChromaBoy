@@ -8,6 +8,7 @@ namespace ChromaBoy.Software
     {
         public static Opcode DecodeOpcode(Gameboy parent, byte code)
         {
+            // TODO: Add HALT operation before LD in if-chain
             if ((code & 0b11000000) == 0b01000000) return new LD(parent, code);
             else if ((code & 0b11000111) == 0b00000110) return new LDI(parent, code);
             else if ((code & 0b11100111) == 0b00000010) return new LDA(parent, code);
@@ -27,6 +28,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111111) == 0b11010110) return new SBI(parent);
             else if ((code & 0b11111000) == 0b10011000) return new SBC(parent, code);
             else if ((code & 0b11111111) == 0b11011110) return new SBCI(parent);
+            else if ((code & 0b11000111) == 0b00000100) return new INC(parent, code);
             throw new NotImplementedException();
         }
     }
