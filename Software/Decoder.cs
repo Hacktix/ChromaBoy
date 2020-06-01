@@ -39,6 +39,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11111000) == 0b10110000) return new OR(parent, code);
             else if ((code & 0b11111111) == 0b11110110) return new ORI(parent);
             else if ((code & 0b11111000) == 0b10111000) return new CP(parent, code);
+            else if ((code & 0b11111111) == 0b11111110) return new CPI(parent);
             throw new NotImplementedException();
         }
     }
