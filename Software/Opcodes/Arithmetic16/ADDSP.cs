@@ -1,4 +1,5 @@
 ﻿using ChromaBoy.Hardware;
+using System;
 
 namespace ChromaBoy.Software.Opcodes
 {
@@ -12,18 +13,16 @@ namespace ChromaBoy.Software.Opcodes
         public override void Execute()
         {
             ushort orgVal = parent.ReadRegister16(Register16.SP);
-            byte addByte = parent.Memory[parent.PC + 1];
-            int addVal;
+            sbyte addByte = (sbyte)parent.Memory[parent.PC + 1];
+            ushort res = (ushort)(orgVal + addByte);
 
-            if ((addByte & 128) > 0) addVal = ~(addByte & 0x7F);
-            else addVal = addByte & 0x7F;
-            parent.WriteRegister16(Register16.SP, (ushort)(orgVal + addVal));
+            parent.WriteRegister16(Register16.SP, res);
 
             // Set Flags
             parent.SetFlag(Flag.Zero, false);
             parent.SetFlag(Flag.AddSub, false);
-            parent.SetFlag(Flag.HalfCarry, (((orgVal & 0xF) + (addVal & 0xF)) & 0x10) == 0x10);
-            parent.SetFlag(Flag.Carry, (orgVal & 0xFF) + addVal > 0xFF);
+            parent.SetFlag(Flag.HalfCarry, (res & 0xF) < (orgVal & 0xF));
+            parent.SetFlag(Flag.Carry, (res & 0xFF) < (orgVal & 0xFF));
         }
     }
 }
