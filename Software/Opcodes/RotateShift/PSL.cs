@@ -16,7 +16,7 @@ namespace ChromaBoy.Software.Opcodes
         public override void Execute()
         {
             byte rVal = (target == Register.M) ? parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] : parent.Registers[target];
-            parent.SetFlag(Flag.Carry, (rVal & 128) > 0);
+            parent.SetFlag(Flag.Carry, (rVal & 1) > 0);
             if (target == Register.M)
                 parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] = (byte)(rVal >> 1);
             else
