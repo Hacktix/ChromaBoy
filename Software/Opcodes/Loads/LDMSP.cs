@@ -11,8 +11,9 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            ushort srcVal = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8));
-            parent.WriteRegister16(Register16.SP, srcVal);
+            ushort addr = (ushort)(parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8));
+            parent.Memory[addr] = (byte)(parent.SP & 0xFF);
+            parent.Memory[addr + 1] = (byte)(parent.SP >> 8);
         }
     }
 }
