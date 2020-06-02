@@ -10,23 +10,24 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            if((parent.Registers[Register.F] & (byte)Flag.AddSub) == 0)
+            byte aval = parent.Registers[Register.A];
+            byte corr = 0;
+            bool setc = false;
+
+            if(parent.GetFlag(Flag.HalfCarry) || (!parent.GetFlag(Flag.AddSub) && (aval & 0xF) > 9))
+                corr |= 0x6;
+
+            if(parent.GetFlag(Flag.Carry) || (!parent.GetFlag(Flag.AddSub) && aval > 0x99))
             {
-                if((parent.Registers[Register.F] & (byte)Flag.Carry) > 0 || parent.Registers[Register.A] > 0x99)
-                {
-                    parent.Registers[Register.A] += 0x60;
-                    parent.SetFlag(Flag.Carry, true);
-                }
-                if ((parent.Registers[Register.F] & (byte)Flag.HalfCarry) > 0 || (parent.Registers[Register.A] & 0xF) > 0x09)
-                    parent.Registers[Register.A] += 0x6;
-            } else {
-                if ((parent.Registers[Register.F] & (byte)Flag.Carry) > 0)
-                    parent.Registers[Register.A] += 0x60;
-                if ((parent.Registers[Register.F] & (byte)Flag.HalfCarry) > 0)
-                    parent.Registers[Register.A] += 0x6;
+                corr |= 0x60;
+                setc = true;
             }
 
+            if (parent.GetFlag(Flag.AddSub)) parent.Registers[Register.A] -= corr;
+            else parent.Registers[Register.A] += corr;
+
             // Set Flags
+            parent.SetFlag(Flag.Carry, setc);
             parent.SetFlag(Flag.HalfCarry, false);
             parent.SetFlag(Flag.Zero, parent.Registers[Register.A] == 0);
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using Decoder = ChromaBoy.Software.Decoder;
 
@@ -28,6 +29,8 @@ namespace ChromaBoy.Hardware
 
         private int CycleCooldown = 0;
 
+        private StreamWriter logWriter;
+
         public Gameboy(byte[] ROM)
         {
             Cartridge = new Cartridge(ROM);
@@ -35,6 +38,7 @@ namespace ChromaBoy.Hardware
             Memory[0xFF44] = 0x90;
 
             if (File.Exists("log.txt")) File.Delete("log.txt");
+            logWriter = new StreamWriter(File.Open("log.txt", FileMode.Create, FileAccess.ReadWrite));
             DebugInit();
         }
 
@@ -59,15 +63,14 @@ namespace ChromaBoy.Hardware
                     continue;
                 }
 
-                if (Halted || Standby)
+                /*if (Halted || Standby)
                 {
                     CycleCooldown += 4;
                     continue;
-                }
+                }*/
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
-                /*File.AppendAllText("log.txt",
-                    "A: " + Registers[Register.A].ToString("X2") + " " +
+                logWriter.Write("A: " + Registers[Register.A].ToString("X2") + " " +
                     "F: " + Registers[Register.F].ToString("X2") + " " +
                     "B: " + Registers[Register.B].ToString("X2") + " " +
                     "C: " + Registers[Register.C].ToString("X2") + " " +
@@ -75,7 +78,9 @@ namespace ChromaBoy.Hardware
                     "E: " + Registers[Register.E].ToString("X2") + " " +
                     "H: " + Registers[Register.H].ToString("X2") + " " +
                     "L: " + Registers[Register.L].ToString("X2") + " " +
-                    "SP: " + SP.ToString("X4") + " PC: 00:" + PC.ToString("X4") + "\r\n");*/
+                    "SP: " + SP.ToString("X4") + " PC: 00:" + PC.ToString("X4") +
+                    " | " + Memory[PC].ToString("X2") + "\n");
+                logWriter.Flush();
                 // Console.WriteLine("AF: " + ReadRegister16(Register16.AF).ToString("X4") + ", BC: " + ReadRegister16(Register16.BC).ToString("X4") + ", DE: " + ReadRegister16(Register16.DE).ToString("X4") + ", HL: " + ReadRegister16(Register16.HL).ToString("X4") + ", SP: " + SP.ToString("X4") + ", PC: " + PC.ToString("X4") + " (" + Memory[PC].ToString("X2") + " " + Memory[PC + 1].ToString("X2") + " " + Memory[PC + 2].ToString("X2") + " " + Memory[PC + 3].ToString("X2") + ") " + opcode);
                 opcode.Execute();
                 PC += (ushort)opcode.Length;
@@ -103,7 +108,7 @@ namespace ChromaBoy.Hardware
                     break;
                 case Register16.AF:
                     Registers[Register.A] = (byte)((value & 0xFF00) >> 8);
-                    Registers[Register.F] = (byte)(value & 0xFF);
+                    Registers[Register.F] = (byte)(value & 0xF0);
                     break;
                 case Register16.SP:
                     SP = value;
@@ -134,6 +139,11 @@ namespace ChromaBoy.Hardware
                 Registers[Register.F] |= (byte)flag;
             else
                 Registers[Register.F] &= (byte)~flag;
+        }
+
+        public bool GetFlag(Flag flag)
+        {
+            return (Registers[Register.F] & ((byte)flag)) > 0;
         }
     }
 }
