@@ -14,9 +14,9 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            byte orgVal = (byte)(parent.Registers[Register.A] - ((parent.Registers[Register.F] & (byte)Flag.Carry) > 0 ? 1 : 0));
-            byte subVal = (source == Register.M) ? parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] : parent.Registers[source];
-            parent.Registers[Register.A] -= subVal;
+            byte orgVal = (byte)(parent.Registers[Register.A]);
+            int subVal = ((source == Register.M) ? parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] : parent.Registers[source]) + ((parent.Registers[Register.F] & (byte)Flag.Carry) > 0 ? 1 : 0);
+            parent.Registers[Register.A] -= (byte)subVal;
 
             // Set Flags
             parent.SetFlag(Flag.AddSub, true);
