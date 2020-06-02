@@ -22,9 +22,8 @@ namespace ChromaBoy.Software.Opcodes
                 Cycles = 8;
                 return;
             }
-            byte param = parent.Memory[parent.PC + 1];
-            int addval = (param & 128) > 0 ? -(param & 0x7F) : param & 0x7F;
-            parent.PC = (ushort)(parent.PC + addval - 2);
+            sbyte addval = (sbyte)parent.Memory[parent.PC + 1];
+            parent.PC = (ushort)(parent.PC + addval);
         }
     }
 }
