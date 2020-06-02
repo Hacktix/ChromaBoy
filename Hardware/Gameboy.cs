@@ -63,7 +63,7 @@ namespace ChromaBoy.Hardware
                 }
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
-                Console.WriteLine("Executing " + Memory[PC].ToString("X2") + " at " + PC.ToString("X4") + ": " + opcode);
+                Console.WriteLine("AF: " + ReadRegister16(Register16.AF).ToString("X4") + ", BC: " + ReadRegister16(Register16.BC).ToString("X4") + ", DE: " + ReadRegister16(Register16.DE).ToString("X4") + ", HL: " + ReadRegister16(Register16.DE).ToString("X4") + ", SP: " + SP.ToString("X4") + ", PC: " + PC.ToString("X4") + " (" + Memory[PC].ToString("X2") + " " + Memory[PC + 1].ToString("X2") + " " + Memory[PC + 2].ToString("X2") + " " + Memory[PC + 3].ToString("X2") + ") " + opcode);
                 opcode.Execute();
                 PC += (ushort)opcode.Length;
                 CycleCooldown = opcode.Cycles - 1;
