@@ -16,7 +16,7 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            byte srcVal = load ? parent.Registers[Register.A] : parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])];
+            byte srcVal = !load ? parent.Registers[Register.A] : parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])];
             if (load)
                 parent.Registers[Register.A] = srcVal;
             else
