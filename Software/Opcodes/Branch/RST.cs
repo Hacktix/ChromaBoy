@@ -15,7 +15,7 @@ namespace ChromaBoy.Software.Opcodes
         public override void Execute()
         {
             parent.SP -= 2;
-            ushort stackval = (ushort)(parent.PC + 3);
+            ushort stackval = (ushort)(parent.PC + 1);
             parent.Memory[parent.SP + 1] = (byte)((stackval & 0xFF00) >> 8);
             parent.Memory[parent.SP] = (byte)(stackval & 0xFF);
             parent.PC = (ushort)(addr - 1);
