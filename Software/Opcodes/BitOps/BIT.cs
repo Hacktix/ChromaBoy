@@ -20,7 +20,7 @@ namespace ChromaBoy.Software.Opcodes
             byte tVal = (target == Register.M) ? parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] : parent.Registers[target];
             parent.SetFlag(Flag.Zero, (tVal & (1 << bit)) == 0);
             parent.SetFlag(Flag.AddSub, false);
-            parent.SetFlag(Flag.HalfCarry, false);
+            parent.SetFlag(Flag.HalfCarry, true);
         }
     }
 }
