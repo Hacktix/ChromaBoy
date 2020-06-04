@@ -17,6 +17,10 @@
         public abstract bool IsAddressReadable(int address);
         public abstract bool AccessesROM(int address);
         public abstract bool HandleWrite(int address, byte value);
+        public abstract bool HandleRead(int address);
+        public virtual byte MBCRead(int address) {
+            return 0xFF;
+        }
         public abstract int TranslateAddress(int address);
     }
 }

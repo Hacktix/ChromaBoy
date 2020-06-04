@@ -28,6 +28,7 @@ namespace ChromaBoy.Hardware
         {
             get
             {
+                if (MBC.HandleRead(i)) return MBC.MBCRead(i);
                 if (MBC.IsAddressReadable(i))
                 {
                     if (MBC.AccessesROM(i))

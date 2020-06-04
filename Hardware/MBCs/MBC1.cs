@@ -18,6 +18,11 @@
             return address >= 0 && address < 0x8000;
         }
 
+        public override bool HandleRead(int address)
+        {
+            return false;
+        }
+
         public override bool HandleWrite(int address, byte value)
         {
             if(address >= 0x2000 && address <= 0x3FFF)
