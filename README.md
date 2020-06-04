@@ -14,10 +14,20 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 # ToDo-List
 ```
 # Emulator Core
+[✓] ROM Metadata decoding
 [✓] CPU Emulation
 [ ] GBC-Specific Features
-[ ] Memory Bank Controllers
-[✓] ROM Metadata decoding
+
+# Memory Bank Controllers (MBCs)
+[~] MBC1
+[ ] MBC2
+[ ] MBC3
+[ ] MBC5
+[ ] MBC6
+[ ] MBC7
+[ ] HuC1
+[ ] MBC1M
+[ ] MMM01
 
 # Input / Output
 [ ] Video Output
