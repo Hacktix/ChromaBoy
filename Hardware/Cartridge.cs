@@ -73,6 +73,7 @@ namespace ChromaBoy.Hardware
             // Cartridge Type + MBC
             CartridgeType = ROM[0x0147];
             MemoryBankController = InitializeMBC();
+            Console.WriteLine(MemoryBankController);
 
             // Title + Manufacturer Code
             for(int i = 0x0134; i <= 0x0143; i++)
@@ -88,10 +89,10 @@ namespace ChromaBoy.Hardware
         {
             switch(CartridgeType)
             {
-                case 0: return new NoMBC();
-                case 1: return new MBC1(0, false);
-                case 2: return new MBC1(ExternalRAMSize, false);
-                case 3: return new MBC1(ExternalRAMSize, true);
+                case 0: return new NoMBC(ROM.Length);
+                case 1: return new MBC1(0, ROM.Length, false) ;
+                case 2: return new MBC1(ExternalRAMSize, ROM.Length, false);
+                case 3: return new MBC1(ExternalRAMSize, ROM.Length, true);
                 default: throw new NotImplementedException();
             }
         }

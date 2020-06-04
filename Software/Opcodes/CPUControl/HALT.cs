@@ -8,7 +8,21 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            parent.Halted = true;
+            if(parent.InterruptsEnabled)
+                parent.Halted = true;
+            else
+            {
+                if ((parent.Memory[0xFF0F] & parent.Memory[0xFFFF]) == 0)
+                {
+                    parent.Halted = true;
+                    parent.CallInterruptHandler = false;
+                }
+                else
+                {
+                    parent.Halted = true;
+                    parent.HaltBug = true;
+                }
+            }
         }
     }
 }

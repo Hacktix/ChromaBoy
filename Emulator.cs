@@ -9,7 +9,7 @@ namespace ChromaBoy
         public static readonly int SCREEN_HEIGHT = 144;
         public static readonly int SCALE_FACTOR = 4;
 
-        public static readonly int CYCLES_PER_UPDATE = 100000;
+        public static readonly int CYCLES_PER_UPDATE = 1000000;
         public static readonly int UPDATE_FREQUENCY = 1000 / (4194304 / CYCLES_PER_UPDATE);
 
         private Gameboy Gameboy;

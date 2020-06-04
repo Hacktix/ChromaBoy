@@ -12,7 +12,7 @@ namespace ChromaBoy.Software.Opcodes
             target = OpcodeUtils.BitsToRegister(opcode & 0b111);
 
             Length = 2;
-            Cycles = 8;
+            Cycles = target == Register.M ? 16 : 8;
         }
 
         public override void Execute()

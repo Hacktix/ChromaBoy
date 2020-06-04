@@ -8,7 +8,7 @@ namespace ChromaBoy.Software.Opcodes
 
         public override void Execute()
         {
-            parent.InterruptsEnabled = true;
+            parent.EINextInstruction = true;
         }
     }
 }

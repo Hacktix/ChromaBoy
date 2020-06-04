@@ -1,4 +1,5 @@
 ﻿using ChromaBoy.Software;
+using ChromaBoy.Software.Opcodes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,35 +19,25 @@ namespace ChromaBoy.Hardware
         public Cartridge Cartridge;
 
         public Dictionary<Register, byte> Registers = new Dictionary<Register, byte>()
-        { { Register.A, 0 }, { Register.F, 2 }, { Register.B, 0 }, { Register.C, 0 }, { Register.D, 0 }, { Register.E, 0 }, { Register.H, 0 }, { Register.L, 0 }, };
+        { { Register.A, 0 }, { Register.F, 0 }, { Register.B, 0 }, { Register.C, 0 }, { Register.D, 0 }, { Register.E, 0 }, { Register.H, 0 }, { Register.L, 0 } };
         public ushort PC = 0x100;
         public ushort SP = 0;
 
         public bool Halted = false;
         public bool Standby = false;
         public bool InterruptsEnabled = false;
+        public bool EINextInstruction = false;
         public long CycleCount = 0;
 
-        private int CycleCooldown = 0;
+        public bool CallInterruptHandler = true;
+        public bool HaltBug = false;
 
-        private StreamWriter logWriter;
+        private int CycleCooldown = 0;
 
         public Gameboy(byte[] ROM)
         {
             Cartridge = new Cartridge(ROM);
             Memory = new Memory(Cartridge.MemoryBankController, ROM);
-            Memory[0xFF44] = 0x90;
-
-            DebugInit();
-        }
-
-        private void DebugInit()
-        {
-            WriteRegister16(Register16.AF, 0x1180);
-            WriteRegister16(Register16.BC, 0x0000);
-            WriteRegister16(Register16.DE, 0x0008);
-            WriteRegister16(Register16.HL, 0x007C);
-            SP = 0xFFFE;
         }
 
         public void EmulateCycles(long cycleLimit)
@@ -55,24 +46,104 @@ namespace ChromaBoy.Hardware
 
             while (cycleCounter-- > 0)
             {
-                if(CycleCooldown > 0)
+                CycleCount++;
+                HandleTimers();
+
+                if (CycleCooldown > 0)
                 {
                     CycleCooldown--;
                     continue;
                 }
 
-                if (Halted || Standby)
+                if (CheckForInterrupt())
+                {
+                    HandleInterrupt();
+                    continue;
+                }
+
+                if (Halted)
                 {
                     CycleCooldown += 4;
-                    continue;
+                    if(CycleCooldown > 0) continue;
+                }
+
+                if (EINextInstruction)
+                {
+                    EINextInstruction = false;
+                    InterruptsEnabled = true;
                 }
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
                 opcode.Execute();
-                PC += (ushort)opcode.Length;
+                if (!HaltBug) PC += (ushort)opcode.Length;
+                else HaltBug = false;
                 CycleCooldown = opcode.Cycles - 1;
+            }
+        }
 
-                CycleCount++;
+        private bool CheckForInterrupt()
+        {
+            if (Halted || InterruptsEnabled) return (Memory[0xFFFF] & Memory[0xFF0F]) != 0;
+            return false;
+        }
+
+        private void HandleInterrupt()
+        {
+            byte intVec = 0;
+            byte maskedInt = (byte)(Memory[0xFFFF] & Memory[0xFF0F]);
+            byte bit = 1;
+            while ((maskedInt & bit) == 0) bit <<= 1;
+            switch (bit)
+            {
+                case 0b00001: intVec = 0x40; break;
+                case 0b00010: intVec = 0x48; break;
+                case 0b00100: intVec = 0x50; break;
+                case 0b01000: intVec = 0x58; break;
+                case 0b10000: intVec = 0x60; break;
+            }
+            InterruptsEnabled = false;
+            Halted = false;
+            Standby = false;
+
+            // Call Interrupt Vector
+            if (CallInterruptHandler)
+            {
+                Memory[0xFF0F] &= (byte)~bit;
+
+                SP -= 2;
+                Memory[SP + 1] = (byte)((PC & 0xFF00) >> 8);
+                Memory[SP] = (byte)(PC & 0xFF);
+                PC = intVec;
+                CycleCooldown = 8;
+            } else CallInterruptHandler = true;
+        }
+
+        private void HandleTimers()
+        {
+            // DIV Register
+            if(CycleCount % 256 == 0) Memory.Set(0xFF04, (byte)(Memory[0xFF04] + 1));
+
+            // TIMA Register
+            if((Memory[0xFF07] & 0b100) > 0) // If "Timer Enable" bit is set
+            {
+                byte clockSetting = (byte)(Memory[0xFF07] & 0b11);
+                int modValue = 0;
+                switch(clockSetting)
+                {
+                    case 0b00: modValue = 1024; break;
+                    case 0b01: modValue = 16; break;
+                    case 0b10: modValue = 64; break;
+                    case 0b11: modValue = 256; break;
+                }
+
+                if(CycleCount % modValue == 0)
+                {
+                    if(Memory[0xFF05] == 0xFF)
+                    {
+                        Memory[0xFF05] = Memory[0xFF06];
+                        Memory[0xFF0F] |= 0b100;
+                    } else Memory[0xFF05]++;
+                }
             }
         }
 

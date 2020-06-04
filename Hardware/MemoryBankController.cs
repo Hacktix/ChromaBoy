@@ -3,11 +3,13 @@
     public abstract class MemoryBankController
     {
         public int RAMSize;
+        public int ROMSize;
         public int MemoryBanks;
 
-        public MemoryBankController(int RAMSize, int MemoryBanks)
+        public MemoryBankController(int RAMSize, int ROMSize, int MemoryBanks)
         {
             this.RAMSize = RAMSize;
+            this.ROMSize = ROMSize;
             this.MemoryBanks = MemoryBanks;
         }
 
