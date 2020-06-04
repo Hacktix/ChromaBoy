@@ -73,7 +73,6 @@ namespace ChromaBoy.Hardware
             // Cartridge Type + MBC
             CartridgeType = ROM[0x0147];
             MemoryBankController = InitializeMBC();
-            Console.WriteLine(MemoryBankController);
 
             // Title + Manufacturer Code
             for(int i = 0x0134; i <= 0x0143; i++)

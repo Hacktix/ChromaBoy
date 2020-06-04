@@ -1,10 +1,5 @@
 ﻿using ChromaBoy.Software;
-using ChromaBoy.Software.Opcodes;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Intrinsics.X86;
-using System.Text;
 using Decoder = ChromaBoy.Software.Decoder;
 
 namespace ChromaBoy.Hardware

@@ -1,8 +1,4 @@
-﻿using ChromaBoy.Software.Opcodes;
-using System;
-using System.Text;
-
-namespace ChromaBoy.Hardware.MBCs
+﻿namespace ChromaBoy.Hardware.MBCs
 {
     class MBC1 : MemoryBankController
     {
