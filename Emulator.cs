@@ -2,6 +2,7 @@
 using Chroma.Graphics;
 using ChromaBoy.Hardware;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace ChromaBoy
@@ -15,6 +16,14 @@ namespace ChromaBoy
 
         public static readonly int CYCLES_PER_UPDATE = 1000000;
         public static readonly int UPDATE_FREQUENCY = 1000 / (4194304 / CYCLES_PER_UPDATE);
+
+        public static Dictionary<byte, Color> ShadeColorMap = new Dictionary<byte, Color>()
+        {
+            { 0, new Color(224, 248, 207) },
+            { 1, new Color(134, 192, 108) },
+            { 2, new Color(48, 104, 80) },
+            { 3, new Color(7, 23, 32) }
+        };
 
         private Gameboy Gameboy;
         private RenderTarget Frame;
@@ -54,8 +63,7 @@ namespace ChromaBoy
                 {
                     for (int y = 0; y < SCREEN_HEIGHT; y++)
                     {
-                        // TODO: Draw correct colors
-                        context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, PPU.Display[x, y] == 0 ? Color.White : Color.Black);
+                        context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[PPU.Display[x, y]]);
                     }
                 }
             });

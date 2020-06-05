@@ -1,4 +1,6 @@
-﻿namespace ChromaBoy.Hardware
+﻿using System;
+
+namespace ChromaBoy.Hardware
 {
     public class PPU
     {
@@ -77,9 +79,11 @@
                 ushort bmp = (ushort)(0b1000000010000000 >> (SLX % 8));
 
                 byte lc = (byte)((tileData & bmp) >> (7 - (SLX % 8)));
-                byte uc = (byte)((tileData & bmp) >> (15 - (SLX % 8)));
+                byte uc = (byte)((tileData & bmp) >> (14 - (SLX % 8)));
+                byte color = (byte)(lc | uc);
+                byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
-                Background[SLX, ly] = (byte)(lc | uc);
+                Background[SLX, ly] = shade;
 
                 if (++SLX == 0) LineDone = true;
             }
