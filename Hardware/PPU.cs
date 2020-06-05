@@ -9,7 +9,7 @@ namespace ChromaBoy.Hardware
         private byte DMACount = 0;
         private bool LineDone = false;
         private byte LastMode = 0;
-        private byte SLX = 0;
+        private byte bSLX = 0;
 
         private ushort BGTilemapBaseAddr = 0x9800;
         private ushort BGTileDataBaseAddr = 0x8000;
@@ -21,7 +21,6 @@ namespace ChromaBoy.Hardware
         // TODO: Merging Object Sprites & Background Tiles
         // TODO: Background Scrolling
         // TODO: Window Display
-        // TODO: LYC Interrupt
 
         public PPU(Gameboy parent)
         {
@@ -56,8 +55,14 @@ namespace ChromaBoy.Hardware
             if(mode != LastMode)
             {
                 LastMode = mode;
-                if (mode == 2 && ((parent.Memory[0xFF41] & 0b100000) != 0))
-                    parent.Memory[0xFF0F] |= 0b10;
+                if (mode == 2)
+                {
+                    if ((parent.Memory[0xFF41] & 0b100000) != 0) parent.Memory[0xFF0F] |= 0b10;
+                    bool lyc = ly == parent.Memory[0xFF45];
+                    parent.Memory[0xFF41] = (byte)((parent.Memory[0xFF41] & 0b1111011) | (lyc ? 0b100 : 0));
+                    if ((parent.Memory[0xFF41] & 0b1000000) != 0) parent.Memory[0xFF0F] |= 0b10;
+                }
+                    
                 else if (mode == 3 && ((parent.Memory[0xFF41] & 0b10000) != 0))
                     parent.Memory[0xFF0F] |= 0b10;
                 if (mode == 1)
@@ -73,19 +78,19 @@ namespace ChromaBoy.Hardware
             {
                 // Draw Background
                 int tileOffset = (ly % 8) * 2;
-                byte tileNo = parent.Memory.Get(BGTilemapBaseAddr + (SLX/8) + 32 * (ly/8));
+                byte tileNo = parent.Memory.Get(BGTilemapBaseAddr + (bSLX/8) + 32 * (ly/8));
                 ushort tileBaseAddr = (ushort)(BGTileDataBaseAddr + tileNo*16 + tileOffset);
                 ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
-                ushort bmp = (ushort)(0b1000000010000000 >> (SLX % 8));
+                ushort bmp = (ushort)(0b1000000010000000 >> (bSLX % 8));
 
-                byte lc = (byte)((tileData & bmp) >> (7 - (SLX % 8)));
-                byte uc = (byte)((tileData & bmp) >> (14 - (SLX % 8)));
+                byte lc = (byte)((tileData & bmp) >> (7 - (bSLX % 8)));
+                byte uc = (byte)((tileData & bmp) >> (14 - (bSLX % 8)));
                 byte color = (byte)(lc | uc);
                 byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
-                Background[SLX, ly] = shade;
+                Background[bSLX, ly] = shade;
 
-                if (++SLX == 0) LineDone = true;
+                if (++bSLX == 0) LineDone = true;
             }
 
             // Increment Cycle Count
