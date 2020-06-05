@@ -76,10 +76,17 @@ namespace ChromaBoy.Hardware
             // Draw Frame
             if(mode == 3)
             {
+                // Update Base Addresses
+                if ((parent.Memory[0xFF40] & 0b1000) > 0) BGTilemapBaseAddr = 0x9C00;
+                else BGTilemapBaseAddr = 0x9800;
+
+                if ((parent.Memory[0xFF40] & 0b10000) > 0) BGTileDataBaseAddr = 0x8000;
+                else BGTileDataBaseAddr = 0x9000;
+
                 // Draw Background
                 int tileOffset = (ly % 8) * 2;
                 byte tileNo = parent.Memory.Get(BGTilemapBaseAddr + (bSLX/8) + 32 * (ly/8));
-                ushort tileBaseAddr = (ushort)(BGTileDataBaseAddr + tileNo*16 + tileOffset);
+                ushort tileBaseAddr = (ushort)(BGTileDataBaseAddr + (BGTileDataBaseAddr == 0x8000 ? tileNo: (int)(sbyte)tileNo) * 16 + tileOffset);
                 ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
                 ushort bmp = (ushort)(0b1000000010000000 >> (bSLX % 8));
 
