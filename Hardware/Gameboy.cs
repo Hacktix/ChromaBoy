@@ -12,6 +12,7 @@ namespace ChromaBoy.Hardware
     {
         public Memory Memory;
         public Cartridge Cartridge;
+        public PPU PPU;
 
         public Dictionary<Register, byte> Registers = new Dictionary<Register, byte>()
         { { Register.A, 0 }, { Register.F, 0 }, { Register.B, 0 }, { Register.C, 0 }, { Register.D, 0 }, { Register.E, 0 }, { Register.H, 0 }, { Register.L, 0 } };
@@ -33,6 +34,7 @@ namespace ChromaBoy.Hardware
         {
             Cartridge = new Cartridge(ROM);
             Memory = new Memory(Cartridge.MemoryBankController, ROM);
+            PPU = new PPU(this);
         }
 
         public void EmulateCycles(long cycleLimit)
@@ -43,6 +45,7 @@ namespace ChromaBoy.Hardware
             {
                 CycleCount++;
                 HandleTimers();
+                PPU.ProcessCycle();
 
                 if (CycleCooldown > 0)
                 {
