@@ -57,9 +57,6 @@ namespace ChromaBoy.Hardware
             {
                 switch(i)
                 {
-                    case 0xFF01:
-                        Console.Write(Encoding.ASCII.GetString(new byte[] { value }));
-                        break;
                     case 0xFF04:
                         RAM[0xFF04] = 0;
                         break;
