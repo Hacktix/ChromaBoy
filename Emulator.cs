@@ -54,6 +54,7 @@ namespace ChromaBoy
                 {
                     for (int y = 0; y < SCREEN_HEIGHT; y++)
                     {
+                        // TODO: Draw correct colors
                         context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, PPU.Display[x, y] == 0 ? Color.White : Color.Black);
                     }
                 }

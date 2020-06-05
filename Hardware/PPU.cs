@@ -1,9 +1,4 @@
-﻿using Chroma.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ChromaBoy.Hardware
+﻿namespace ChromaBoy.Hardware
 {
     public class PPU
     {
@@ -19,6 +14,12 @@ namespace ChromaBoy.Hardware
 
         public static byte[,] Display = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public static byte[,] Background = new byte[256,256];
+
+        // TODO: Draw Object Sprites
+        // TODO: Merging Object Sprites & Background Tiles
+        // TODO: Background Scrolling
+        // TODO: Window Display
+        // TODO: LYC Interrupt
 
         public PPU(Gameboy parent)
         {
