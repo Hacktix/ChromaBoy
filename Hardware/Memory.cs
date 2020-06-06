@@ -42,6 +42,7 @@ namespace ChromaBoy.Hardware
                 // VRAM & OAM Lock
                 if (i >= 0x8000 && i <= 0x9FFF && (ROM[0xFF41] & 3) == 3) return 0xFF;
                 if (i >= 0xFE00 && i <= 0xFE9F && (ROM[0xFF41] & 3) > 1) return 0xFF;
+                if (i == 0xFF00) return 0xFF;
 
                 if (MBC.HandleRead(i)) return MBC.MBCRead(i);
                 if (MBC.IsAddressReadable(i))
