@@ -1,4 +1,5 @@
 ﻿using ChromaBoy.Software;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Decoder = ChromaBoy.Software.Decoder;
@@ -13,6 +14,7 @@ namespace ChromaBoy.Hardware
     {
         public long EndTime = 0;
         private Stopwatch PerformanceTimer;
+        private Stopwatch CycleTimer;
 
         public Memory Memory;
         public Cartridge Cartridge;
@@ -41,6 +43,7 @@ namespace ChromaBoy.Hardware
             PPU = new PPU(this);
 
             PerformanceTimer = new Stopwatch();
+            CycleTimer = new Stopwatch();
         }
 
         public void EmulateCycles(long cycleLimit)
@@ -50,6 +53,8 @@ namespace ChromaBoy.Hardware
 
             while (cycleCounter-- > 0)
             {
+                CycleTimer.Start();
+
                 CycleCount++;
                 HandleTimers();
                 PPU.ProcessCycle();
@@ -57,19 +62,25 @@ namespace ChromaBoy.Hardware
                 if (CycleCooldown > 0)
                 {
                     CycleCooldown--;
+                    WaitForCycleFinish(CycleTimer);
                     continue;
                 }
 
                 if (CheckForInterrupt())
                 {
                     HandleInterrupt();
+                    WaitForCycleFinish(CycleTimer);
                     continue;
                 }
 
                 if (Halted)
                 {
                     CycleCooldown += 4;
-                    if(CycleCooldown > 0) continue;
+                    if (CycleCooldown > 0)
+                    {
+                        WaitForCycleFinish(CycleTimer);
+                        continue;
+                    }
                 }
 
                 if (EINextInstruction)
@@ -83,9 +94,17 @@ namespace ChromaBoy.Hardware
                 if (!HaltBug) PC += (ushort)opcode.Length;
                 else HaltBug = false;
                 CycleCooldown = opcode.Cycles - 1;
+
+                WaitForCycleFinish(CycleTimer);
             }
 
             EndTime = PerformanceTimer.ElapsedTicks;
+        }
+
+        private void WaitForCycleFinish(Stopwatch timer)
+        {
+            while (timer.ElapsedTicks < (1.0 / (4194304 * 2.0)) * TimeSpan.TicksPerSecond) { /* Wait... */ }
+            timer.Reset();
         }
 
         private bool CheckForInterrupt()
