@@ -19,7 +19,6 @@ namespace ChromaBoy.Hardware
 
         // TODO: Draw Object Sprites
         // TODO: Merging Object Sprites & Background Tiles
-        // TODO: Background Scrolling
         // TODO: Window Display
 
         public PPU(Gameboy parent)
@@ -111,7 +110,7 @@ namespace ChromaBoy.Hardware
             {
                 for(int y = 0; y < Emulator.SCREEN_HEIGHT; y++)
                 {
-                    Display[x, y] = Background[x, y];
+                    Display[x, y] = Background[(x + parent.Memory.Get(0xFF43)) % 256, (y + parent.Memory.Get(0xFF42)) % 256];
                 }
             }
         }
