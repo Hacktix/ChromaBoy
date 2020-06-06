@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChromaBoy.Software.Opcodes;
+using System;
 
 namespace ChromaBoy.Hardware.MBCs
 {
@@ -32,33 +33,18 @@ namespace ChromaBoy.Hardware.MBCs
             if(address >= 0x2000 && address <= 0x3FFF)
             {
                 ROMBankNumber = (byte)(value & 0x1F);
-                UpdateBankNumbers();
+                if ((ROMBankNumber & 0b11111) == 0) ROMBankNumber++;
                 return false;
-            } else if(address >= 0x6000 && address <= 0x7FFF) {
-                Mode = (byte)(value & 1);
-                UpdateBankNumbers();
-                return false;
-            } else if(address >= 0x4000 && address <= 0x5FFF) {
+            } else if (address >= 0x4000 && address <= 0x5FFF) {
                 HiBank = (byte)(value & 0b11);
-                UpdateBankNumbers();
+                return false;
+            }
+            else if (address >= 0x6000 && address <= 0x7FFF) {
+                Mode = (byte)(value & 1);
                 return false;
             }
 
             return true;
-        }
-
-        private void UpdateBankNumbers()
-        {
-            if(Mode == 0)
-            {
-                if (ROMBankNumber == 0) ROMBankNumber++;
-                ROMBankNumber = (byte)((ROMBankNumber & 0b11111) | (HiBank << 5));
-                RAMBankNumber = 0;
-            } else {
-                ROMBankNumber = (byte)(ROMBankNumber & 0b11111);
-                if (ROMBankNumber == 0) ROMBankNumber++;
-                RAMBankNumber = HiBank;
-            }
         }
 
         public override bool IsAddressReadable(int address)
@@ -73,8 +59,12 @@ namespace ChromaBoy.Hardware.MBCs
 
         public override int TranslateAddress(int address)
         {
-            if (address >= 0x4000 && address <= 0x7FFF)
-                return ((ROMBankNumber * 0x4000) % ROMSize) + (address - 0x4000);
+            if (address <= 0x7FFF)
+            {
+                if (address < 0x4000 && Mode == 0) return address;
+                else if (address < 0x4000) return (((HiBank << 5) * 0x4000) % ROMSize) + address;
+                return (((ROMBankNumber | (HiBank << 5)) * 0x4000) % ROMSize) + (address - 0x4000);
+            }
             if (address >= 0xE000 && address <= 0xFDFF)
                 return address - 0x2000;
             return address;
