@@ -14,8 +14,11 @@ namespace ChromaBoy
         public static readonly int SCALE_FACTOR = 4;
         public static readonly Vector2 SCALE_VECTOR = new Vector2(SCALE_FACTOR, SCALE_FACTOR);
 
-        public static readonly int CYCLES_PER_UPDATE = 1000000;
+        public static readonly int CYCLES_PER_UPDATE = 3000000;
         public static readonly int UPDATE_FREQUENCY = 1000 / (4194304 / CYCLES_PER_UPDATE);
+
+        private static readonly int PERFORMANCE_BUFFER_LENGTH = 100;
+        private List<double> PerformanceBuffer = new List<double>();
 
         public static Dictionary<byte, Color> ShadeColorMap = new Dictionary<byte, Color>()
         {
@@ -51,7 +54,16 @@ namespace ChromaBoy
         {
             if(Gameboy != null)
             {
-                Window.Properties.Title = "ChromaBoy - " + Gameboy.Cartridge.Title;
+                // Performance Calculation
+                double percent = (CYCLES_PER_UPDATE * (1.0 / 4194304.0) * TimeSpan.TicksPerSecond) / Gameboy.EndTime;
+                PerformanceBuffer.Add(percent);
+                if (PerformanceBuffer.Count > PERFORMANCE_BUFFER_LENGTH) PerformanceBuffer.RemoveAt(0);
+
+                percent = 0;
+                foreach (double value in PerformanceBuffer) percent += value;
+                percent /= PerformanceBuffer.Count;
+                percent = ((int)(percent * 10000)) / 100.0;
+                Window.Properties.Title = "ChromaBoy (" + Window.FPS + " FPS) [" + percent + "%] : " + Gameboy.Cartridge.Title;
             }
         }
 

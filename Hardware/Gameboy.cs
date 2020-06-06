@@ -1,5 +1,6 @@
 ﻿using ChromaBoy.Software;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Decoder = ChromaBoy.Software.Decoder;
 
 namespace ChromaBoy.Hardware
@@ -10,6 +11,9 @@ namespace ChromaBoy.Hardware
 
     public class Gameboy
     {
+        public long EndTime = 0;
+        private Stopwatch PerformanceTimer;
+
         public Memory Memory;
         public Cartridge Cartridge;
         public PPU PPU;
@@ -35,11 +39,14 @@ namespace ChromaBoy.Hardware
             Cartridge = new Cartridge(ROM);
             Memory = new Memory(Cartridge.MemoryBankController, ROM);
             PPU = new PPU(this);
+
+            PerformanceTimer = new Stopwatch();
         }
 
         public void EmulateCycles(long cycleLimit)
         {
             long cycleCounter = cycleLimit;
+            PerformanceTimer.Restart();
 
             while (cycleCounter-- > 0)
             {
@@ -77,6 +84,8 @@ namespace ChromaBoy.Hardware
                 else HaltBug = false;
                 CycleCooldown = opcode.Cycles - 1;
             }
+
+            EndTime = PerformanceTimer.ElapsedTicks;
         }
 
         private bool CheckForInterrupt()
