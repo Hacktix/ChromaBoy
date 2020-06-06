@@ -40,8 +40,8 @@ namespace ChromaBoy.Hardware
             get
             {
                 // VRAM & OAM Lock
-                if (i >= 0x8000 && i <= 0x9FFF && (ROM[0xFF41] & 3) == 3) return 0xFF;
-                if (i >= 0xFE00 && i <= 0xFE9F && (ROM[0xFF41] & 3) > 1) return 0xFF;
+                if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3) return 0xFF;
+                if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1) return 0xFF;
                 if (i == 0xFF00) return 0xFF;
 
                 if (MBC.HandleRead(i)) return MBC.MBCRead(i);
@@ -56,7 +56,11 @@ namespace ChromaBoy.Hardware
             }
             set
             {
-                switch(i)
+                // VRAM & OAM Lock
+                if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3) return;
+                if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1) return;
+
+                switch (i)
                 {
                     case 0xFF04:
                         RAM[0xFF04] = 0;
