@@ -14,6 +14,9 @@ namespace ChromaBoy.Hardware
         private ushort BGTilemapBaseAddr = 0x9800;
         private ushort BGTileDataBaseAddr = 0x8000;
 
+        private byte BGScrX = 0;
+        private byte BGScrY = 0;
+
         public static byte[,] Display = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public static byte[,] Background = new byte[256,256];
 
@@ -94,9 +97,12 @@ namespace ChromaBoy.Hardware
                 byte color = (byte)(lc | uc);
                 byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
-                Background[(byte)(bSLX - parent.Memory.Get(0xFF43)), (byte)(ly - parent.Memory.Get(0xFF42))] = shade;
+                Background[bSLX, ly] = shade;
 
                 if (++bSLX == 0) LineDone = true;
+
+                BGScrX = parent.Memory.Get(0xFF43);
+                BGScrY = parent.Memory.Get(0xFF42);
             }
 
             // Increment Cycle Count
@@ -110,7 +116,7 @@ namespace ChromaBoy.Hardware
             {
                 for(int y = 0; y < Emulator.SCREEN_HEIGHT; y++)
                 {
-                    Display[x, y] = Background[x, y];
+                    Display[x, y] = Background[(byte)(BGScrX + x), (byte)(BGScrY + y)];
                 }
             }
         }
