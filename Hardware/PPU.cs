@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ChromaBoy.Hardware
+﻿namespace ChromaBoy.Hardware
 {
     public class PPU
     {
@@ -13,9 +11,6 @@ namespace ChromaBoy.Hardware
 
         private ushort BGTilemapBaseAddr = 0x9800;
         private ushort BGTileDataBaseAddr = 0x8000;
-
-        private byte BGScrX = 0;
-        private byte BGScrY = 0;
 
         public static byte[,] Display = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public static byte[,] Background = new byte[256,256];
