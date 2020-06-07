@@ -30,11 +30,14 @@ namespace ChromaBoy.Hardware
         public bool InterruptsEnabled = false;
         public bool EINextInstruction = false;
         public long CycleCount = 0;
-        public long TimerCycleCount = 0;
-        public sbyte TimerReloadCooldown = -1;
 
         public bool CallInterruptHandler = true;
         public bool HaltBug = false;
+
+        public ushort DivRegister = 0xABCC;
+        private bool LastTimerAndResult = false;
+        private bool TimerAndResult = false;
+        public sbyte TimerReloadCooldown = -1;
 
         private int CycleCooldown = 0;
 
@@ -148,37 +151,29 @@ namespace ChromaBoy.Hardware
 
         private void HandleTimers()
         {
-            TimerCycleCount++;
+            DivRegister++;
+            Memory.Set(0xFF04, (byte)((DivRegister & 0xFF00) >> 8));
 
-            // DIV Register
-            if (TimerCycleCount % 256 == 0) Memory.Set(0xFF04, (byte)(Memory[0xFF04] + 1));
+            int shiftCnt = (Memory[0xFF07] & 0b11) == 0 ? 6 : (Memory[0xFF07] & 0b11) == 1 ? 0 : (Memory[0xFF07] & 0b11) == 2 ? 2 : 4;
+            ushort dbmp = (ushort)(0b1000 << shiftCnt);
 
-            // TIMA Register
-            if((Memory[0xFF07] & 0b100) > 0) // If "Timer Enable" bit is set
+            TimerAndResult = ((DivRegister & dbmp) & ((Memory[0xFF07] & 0b100) << (shiftCnt+1))) > 0;
+            if(TimerAndResult != LastTimerAndResult)
             {
-                byte clockSetting = (byte)(Memory[0xFF07] & 0b11);
-                int modValue = 0;
-                switch(clockSetting)
+                LastTimerAndResult = TimerAndResult;
+                if(!TimerAndResult)
                 {
-                    case 0b00: modValue = 1024; break;
-                    case 0b01: modValue = 16; break;
-                    case 0b10: modValue = 64; break;
-                    case 0b11: modValue = 256; break;
-                }
-
-                if(TimerCycleCount % modValue == 0)
-                {
-                    if(Memory[0xFF05] == 0xFF)
+                    if (Memory[0xFF05] == 0xFF)
                     {
                         Memory[0xFF05] = 0;
                         TimerReloadCooldown = 4;
                         Memory[0xFF0F] |= 0b100;
-                    } else Memory[0xFF05]++;
+                    }
+                    else Memory[0xFF05]++;
                 }
             }
 
-            if (TimerReloadCooldown > -1)
-                if (--TimerReloadCooldown == -1) Memory[0xFF05] = Memory[0xFF06];
+            if (TimerReloadCooldown > -1 && --TimerReloadCooldown == -1) Memory[0xFF05] = Memory[0xFF06];
         }
 
         public void WriteRegister16(Register16 regpair, ushort value)
