@@ -1,4 +1,5 @@
 ﻿using ChromaBoy.Hardware;
+using System;
 
 namespace ChromaBoy.Software.Opcodes
 {
@@ -6,6 +7,7 @@ namespace ChromaBoy.Software.Opcodes
     {
         private bool regC;
         private bool load;
+        private int actionTick;
 
         public LDH(Gameboy parent, byte opcode) : base(parent) {
             load = (opcode & 0b10000) > 0;
@@ -13,16 +15,23 @@ namespace ChromaBoy.Software.Opcodes
 
             Cycles = regC ? 8 : 12;
             Length = regC ? 1 : 2;
+
+            TickAccurate = true;
+            actionTick = regC ? 2 : 4;
         }
 
-        public override void Execute()
+        public override void ExecuteTick()
         {
-            int memaddr = 0xFF00 + (regC ? parent.Registers[Register.C] : parent.Memory[parent.PC + 1]);
-            byte srcVal = load ? parent.Memory[memaddr] : parent.Registers[Register.A];
-            if (load)
-                parent.Registers[Register.A] = srcVal;
-            else
-                parent.Memory[memaddr] = srcVal;
+            Tick++;
+            if (Tick == actionTick)
+            {
+                int memaddr = 0xFF00 + (regC ? parent.Registers[Register.C] : parent.Memory[parent.PC + 1]);
+                byte srcVal = load ? parent.Memory[memaddr] : parent.Registers[Register.A];
+                if (load)
+                    parent.Registers[Register.A] = srcVal;
+                else
+                    parent.Memory[memaddr] = srcVal;
+            }
         }
     }
 }

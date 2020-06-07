@@ -68,7 +68,14 @@ namespace ChromaBoy.Hardware
 
                 if (CycleCooldown > 0)
                 {
+                    if (ExecOpcode != null) ExecOpcode.ExecuteTick();
                     CycleCooldown--;
+                    if (CycleCooldown == 0 && ExecOpcode != null)
+                    {
+                        if (!HaltBug) PC += (ushort)ExecOpcode.Length;
+                        else HaltBug = false;
+                        ExecOpcode = null;
+                    }
                     WaitForCycleFinish(CycleTimer);
                     continue;
                 }
@@ -100,12 +107,13 @@ namespace ChromaBoy.Hardware
                 if (opcode.TickAccurate) ExecOpcode = opcode;
                 else ExecOpcode = null;
 
-                if(!opcode.TickAccurate)
+                if (!opcode.TickAccurate)
                 {
                     opcode.Execute();
                     if (!HaltBug) PC += (ushort)opcode.Length;
                     else HaltBug = false;
-                } else ExecOpcode.ExecuteTick();
+                }
+                else ExecOpcode.ExecuteTick();
 
                 CycleCooldown = opcode.Cycles - 1;
                 WaitForCycleFinish(CycleTimer);

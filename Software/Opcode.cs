@@ -13,7 +13,7 @@ namespace ChromaBoy.Software
 
         public Opcode(Gameboy parent) { this.parent = parent; }
 
-        public abstract void Execute();
+        public virtual void Execute() { }
         public virtual void ExecuteTick()
         {
             Tick++;
