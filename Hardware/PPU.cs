@@ -26,7 +26,6 @@ namespace ChromaBoy.Hardware
 
         // TODO: Draw Object Sprites
         // TODO: Merging Object Sprites & Background Tiles
-        // TODO: Window Display
 
         public PPU(Gameboy parent)
         {
@@ -76,7 +75,13 @@ namespace ChromaBoy.Hardware
                     if ((parent.Memory[0xFF41] & 0b1000) != 0) parent.Memory[0xFF0F] |= 0b10;
                     parent.Memory[0xFF0F] |= 1;
                     MergeToDisplay();
+                    bool lyc = ly == parent.Memory[0xFF45];
+                    parent.Memory[0xFF41] = (byte)((parent.Memory[0xFF41] & 0b1111011) | (lyc ? 0b100 : 0));
+                    if ((parent.Memory[0xFF41] & 0b1000000) != 0) parent.Memory[0xFF0F] |= 0b10;
                 }
+
+                if(mode == 0 && ((parent.Memory[0xFF41] & 0b1000) != 0))
+                    parent.Memory[0xFF0F] |= 0b10;
             }
 
             WindowEnable = (parent.Memory[0xFF40] & 0b100000) > 0;
@@ -100,22 +105,27 @@ namespace ChromaBoy.Hardware
                     
                     if (WindowEnable && bSLX >= WX && ly >= WY)
                     {
-                        byte tmpX = (byte)(bSLX - WX);
-                        byte tmpY = (byte)(ly - WY);
-
                         // Draw Window
-                        int tileOffset = (tmpY % 8) * 2;
-                        byte tileNo = parent.Memory.Get(WDTilemapBaseAddr + (tmpX / 8) + 32 * (tmpY / 8));
-                        ushort tileBaseAddr = (ushort)(BGTileDataBaseAddr + (BGTileDataBaseAddr == 0x8000 ? tileNo : (int)(sbyte)tileNo) * 16 + tileOffset);
-                        ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
-                        ushort bmp = (ushort)(0b1000000010000000 >> (tmpX % 8));
+                        for (int i = 0; i < 8; i++, bSLX++)
+                        {
+                            byte tmpX = (byte)(bSLX - WX);
+                            byte tmpY = (byte)(ly - WY);
 
-                        byte lc = (byte)((tileData & bmp) >> (7 - (tmpX % 8)));
-                        byte uc = (byte)((tileData & bmp) >> (14 - (tmpX % 8)));
-                        byte color = (byte)(lc | uc);
-                        byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
+                            int tileOffset = (tmpY % 8) * 2;
+                            byte tileNo = parent.Memory.Get(WDTilemapBaseAddr + (tmpX / 8) + 32 * (tmpY / 8));
+                            ushort tileBaseAddr = (ushort)(BGTileDataBaseAddr + (BGTileDataBaseAddr == 0x8000 ? tileNo : (int)(sbyte)tileNo) * 16 + tileOffset);
+                            ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
+                            ushort bmp = (ushort)(0b1000000010000000 >> (tmpX % 8));
 
-                        Background[bSLX, ly] = shade;
+                            byte lc = (byte)((tileData & bmp) >> (7 - (tmpX % 8)));
+                            byte uc = (byte)((tileData & bmp) >> (14 - (tmpX % 8)));
+                            byte color = (byte)(lc | uc);
+                            byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
+
+                            Background[bSLX, ly] = shade;
+
+                            if((byte)(bSLX + 1) == 0) LineDone = true;
+                        }
                     }
                     else
                     {
@@ -134,6 +144,8 @@ namespace ChromaBoy.Hardware
                             byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
                             Background[(byte)(bSLX - parent.Memory.Get(0xFF43)), (byte)(ly - parent.Memory.Get(0xFF42))] = shade;
+
+                            if ((byte)(bSLX + 1) == 0) LineDone = true;
                         }
                     }
                 }
@@ -142,8 +154,6 @@ namespace ChromaBoy.Hardware
                     for (int i = 0; i < 8; i++, bSLX++)
                         Background[bSLX, ly] = 0;
                 }
-
-                if (bSLX == 0) LineDone = true;
             }
 
             // Increment Cycle Count

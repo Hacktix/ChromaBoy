@@ -21,7 +21,7 @@ namespace ChromaBoy.Hardware
         public PPU PPU;
 
         public Dictionary<Register, byte> Registers = new Dictionary<Register, byte>()
-        { { Register.A, 0 }, { Register.F, 0 }, { Register.B, 0 }, { Register.C, 0 }, { Register.D, 0 }, { Register.E, 0 }, { Register.H, 0 }, { Register.L, 0 } };
+        { { Register.A, 0x01 }, { Register.F, 0xB0 }, { Register.B, 0x00 }, { Register.C, 0x13 }, { Register.D, 0x00 }, { Register.E, 0xD8 }, { Register.H, 0x01 }, { Register.L, 0x4D } };
         public ushort PC = 0x100;
         public ushort SP = 0;
 

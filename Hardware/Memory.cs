@@ -64,6 +64,7 @@ namespace ChromaBoy.Hardware
                 {
                     case 0xFF04:
                         RAM[0xFF04] = 0;
+                        RAM[0xFF05] = RAM[0xFF06];
                         break;
                     case 0xFF41:
                         RAM[0xFF41] = (byte)((RAM[0xFF41] & 0b111) | (value & 0b1111000));
