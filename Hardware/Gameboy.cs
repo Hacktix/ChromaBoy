@@ -41,6 +41,8 @@ namespace ChromaBoy.Hardware
 
         private int CycleCooldown = 0;
 
+        private Opcode ExecOpcode;
+
         public Gameboy(byte[] ROM)
         {
             Cartridge = new Cartridge(ROM);
@@ -95,11 +97,17 @@ namespace ChromaBoy.Hardware
                 }
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
-                opcode.Execute();
-                if (!HaltBug) PC += (ushort)opcode.Length;
-                else HaltBug = false;
-                CycleCooldown = opcode.Cycles - 1;
+                if (opcode.TickAccurate) ExecOpcode = opcode;
+                else ExecOpcode = null;
 
+                if(!opcode.TickAccurate)
+                {
+                    opcode.Execute();
+                    if (!HaltBug) PC += (ushort)opcode.Length;
+                    else HaltBug = false;
+                } else ExecOpcode.ExecuteTick();
+
+                CycleCooldown = opcode.Cycles - 1;
                 WaitForCycleFinish(CycleTimer);
             }
 
