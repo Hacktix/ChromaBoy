@@ -30,6 +30,7 @@ namespace ChromaBoy.Hardware
         public bool InterruptsEnabled = false;
         public bool EINextInstruction = false;
         public long CycleCount = 0;
+        public long TimerCycleCount = 0;
 
         public bool CallInterruptHandler = true;
         public bool HaltBug = false;
@@ -39,7 +40,7 @@ namespace ChromaBoy.Hardware
         public Gameboy(byte[] ROM)
         {
             Cartridge = new Cartridge(ROM);
-            Memory = new Memory(Cartridge.MemoryBankController, ROM);
+            Memory = new Memory(Cartridge.MemoryBankController, ROM, this);
             PPU = new PPU(this);
 
             PerformanceTimer = new Stopwatch();
@@ -146,8 +147,10 @@ namespace ChromaBoy.Hardware
 
         private void HandleTimers()
         {
+            TimerCycleCount++;
+
             // DIV Register
-            if(CycleCount % 256 == 0) Memory.Set(0xFF04, (byte)(Memory[0xFF04] + 1));
+            if(TimerCycleCount % 256 == 0) Memory.Set(0xFF04, (byte)(Memory[0xFF04] + 1));
 
             // TIMA Register
             if((Memory[0xFF07] & 0b100) > 0) // If "Timer Enable" bit is set
@@ -162,7 +165,7 @@ namespace ChromaBoy.Hardware
                     case 0b11: modValue = 256; break;
                 }
 
-                if(CycleCount % modValue == 0)
+                if(TimerCycleCount % modValue == 0)
                 {
                     if(Memory[0xFF05] == 0xFF)
                     {
