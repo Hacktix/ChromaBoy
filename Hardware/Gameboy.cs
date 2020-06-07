@@ -31,6 +31,7 @@ namespace ChromaBoy.Hardware
         public bool EINextInstruction = false;
         public long CycleCount = 0;
         public long TimerCycleCount = 0;
+        public sbyte TimerReloadCooldown = -1;
 
         public bool CallInterruptHandler = true;
         public bool HaltBug = false;
@@ -150,7 +151,7 @@ namespace ChromaBoy.Hardware
             TimerCycleCount++;
 
             // DIV Register
-            if(TimerCycleCount % 256 == 0) Memory.Set(0xFF04, (byte)(Memory[0xFF04] + 1));
+            if (TimerCycleCount % 256 == 0) Memory.Set(0xFF04, (byte)(Memory[0xFF04] + 1));
 
             // TIMA Register
             if((Memory[0xFF07] & 0b100) > 0) // If "Timer Enable" bit is set
@@ -169,11 +170,15 @@ namespace ChromaBoy.Hardware
                 {
                     if(Memory[0xFF05] == 0xFF)
                     {
-                        Memory[0xFF05] = Memory[0xFF06];
+                        Memory[0xFF05] = 0;
+                        TimerReloadCooldown = 4;
                         Memory[0xFF0F] |= 0b100;
                     } else Memory[0xFF05]++;
                 }
             }
+
+            if (TimerReloadCooldown > -1)
+                if (--TimerReloadCooldown == -1) Memory[0xFF05] = Memory[0xFF06];
         }
 
         public void WriteRegister16(Register16 regpair, ushort value)
