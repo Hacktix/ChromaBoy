@@ -10,6 +10,8 @@ namespace ChromaBoy.Hardware
         public byte[] RAM;
         private Gameboy parent;
 
+        public bool UpdatedSTAT = false;
+
         public Memory(MemoryBankController MBC, byte[] ROM, Gameboy parent)
         {
             this.MBC = MBC;
@@ -74,6 +76,7 @@ namespace ChromaBoy.Hardware
                         break;
                     case 0xFF41:
                         RAM[0xFF41] = (byte)((RAM[0xFF41] & 0b111) | (value & 0b1111000));
+                        UpdatedSTAT = true;
                         break;
                     case 0xFF46:
                         DMATransfer = true;

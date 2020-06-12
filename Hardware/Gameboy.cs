@@ -64,7 +64,6 @@ namespace ChromaBoy.Hardware
 
                 CycleCount++;
                 HandleTimers();
-                PPU.ProcessCycle();
 
                 if (CycleCooldown > 0)
                 {
@@ -76,6 +75,7 @@ namespace ChromaBoy.Hardware
                         else HaltBug = false;
                         ExecOpcode = null;
                     }
+                    PPU.ProcessCycle();
                     WaitForCycleFinish(CycleTimer);
                     continue;
                 }
@@ -83,15 +83,17 @@ namespace ChromaBoy.Hardware
                 if (CheckForInterrupt())
                 {
                     HandleInterrupt();
+                    PPU.ProcessCycle();
                     WaitForCycleFinish(CycleTimer);
                     continue;
                 }
 
                 if (Halted)
                 {
-                    CycleCooldown += 4;
+                    if(CycleCooldown == 0) CycleCooldown += 4;
                     if (CycleCooldown > 0)
                     {
+                        PPU.ProcessCycle();
                         WaitForCycleFinish(CycleTimer);
                         continue;
                     }
@@ -116,6 +118,8 @@ namespace ChromaBoy.Hardware
                 else ExecOpcode.ExecuteTick();
 
                 CycleCooldown = opcode.Cycles - 1;
+
+                PPU.ProcessCycle();
                 WaitForCycleFinish(CycleTimer);
             }
 
