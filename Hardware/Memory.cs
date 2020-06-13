@@ -51,7 +51,13 @@ namespace ChromaBoy.Hardware
                 // VRAM & OAM Lock
                 if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3) return 0xFF;
                 if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1) return 0xFF;
-                if (i == 0xFF00) return 0xFF;
+
+                // Inputs
+                if (i == 0xFF00)
+                {
+                    if ((RAM[0xFF00] & 0b10000) == 0) return (byte)(RAM[0xFF00] | (Emulator.InputBits & 0x0F));
+                    else if ((RAM[0xFF00] & 0b100000) == 0) return (byte)(RAM[0xFF00] | ((Emulator.InputBits & 0xF0) >> 4));
+                }
 
                 if (MBC.HandleRead(i)) return MBC.MBCRead(i);
                 if (MBC.IsAddressReadable(i))
@@ -71,13 +77,16 @@ namespace ChromaBoy.Hardware
 
                 switch (i)
                 {
+                    case 0xFF00:
+                        RAM[0xFF00] = (byte)(value & 0b110000);
+                        break;
                     case 0xFF04:
                         RAM[0xFF04] = 0;
                         RAM[0xFF05] = RAM[0xFF06];
                         parent.DivRegister = 0;
                         break;
                     case 0xFF05:
-                        if (parent.TimerReloadCooldown == -1)  RAM[0xFF05] = value;
+                        if (parent.TimerReloadCooldown == -1) RAM[0xFF05] = value;
                         break;
                     case 0xFF41:
                         RAM[0xFF41] = (byte)((RAM[0xFF41] & 0b111) | (value & 0b1111000));

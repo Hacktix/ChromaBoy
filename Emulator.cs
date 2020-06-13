@@ -1,8 +1,10 @@
 ﻿using Chroma;
 using Chroma.Graphics;
+using Chroma.Input.EventArgs;
 using ChromaBoy.Hardware;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 
 namespace ChromaBoy
@@ -29,6 +31,8 @@ namespace ChromaBoy
             { 0, new Color(202, 220, 159) }
         };
 
+        public static byte InputBits = 0xFF;
+
         private Gameboy Gameboy;
         private RenderTarget Frame;
 
@@ -50,6 +54,60 @@ namespace ChromaBoy
         {
             Gameboy.EmulateCycles(CYCLES_PER_UPDATE);
             UpdateWindowTitle();
+        }
+
+        protected override void KeyPressed(KeyEventArgs e)
+        {
+            switch(e.KeyCode)
+            {
+                case Chroma.Input.KeyCode.Right:
+                    InputBits &= 0b11111110;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.Left:
+                    InputBits &= 0b11111101;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.Up:
+                    InputBits &= 0b11111011;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.Down:
+                    InputBits &= 0b11110111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.C:
+                    InputBits &= 0b11101111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.X:
+                    InputBits &= 0b11011111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.RightShift: 
+                    InputBits &= 0b10111111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.KeyCode.Return:
+                    InputBits &= 0b01111111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+            }
+        }
+
+        protected override void KeyReleased(KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Chroma.Input.KeyCode.Right:      InputBits |= 0b00000001; break;
+                case Chroma.Input.KeyCode.Left:       InputBits |= 0b00000010; break;
+                case Chroma.Input.KeyCode.Up:         InputBits |= 0b00000100; break;
+                case Chroma.Input.KeyCode.Down:       InputBits |= 0b00001000; break;
+                case Chroma.Input.KeyCode.C:          InputBits |= 0b00010000; break;
+                case Chroma.Input.KeyCode.X:          InputBits |= 0b00100000; break;
+                case Chroma.Input.KeyCode.RightShift: InputBits |= 0b01000000; break;
+                case Chroma.Input.KeyCode.Return:     InputBits |= 0b10000000; break;
+            }
         }
 
         private void UpdateWindowTitle()
