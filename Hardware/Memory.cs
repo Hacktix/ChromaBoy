@@ -66,8 +66,8 @@ namespace ChromaBoy.Hardware
             set
             {
                 // VRAM & OAM Lock
-                if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3) return;
-                if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1) return;
+                if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3 && (RAM[0xFF40] & 128) != 0) return;
+                if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1 && (RAM[0xFF40] & 128) != 0) return;
 
                 switch (i)
                 {
