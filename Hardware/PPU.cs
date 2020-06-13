@@ -27,6 +27,7 @@ namespace ChromaBoy.Hardware
         private ushort WDTilemapBaseAddr = 0x9800;
 
         public static bool CanDraw = false;
+        public static bool HasUpdated = true;
         public static byte[,] Display = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public static byte[,] Background = new byte[256, 256];
         public static byte[,] Window = new byte[256, 256];
@@ -229,6 +230,7 @@ namespace ChromaBoy.Hardware
                 }
             }
             CanDraw = true;
+            HasUpdated = true;
         }
     }
 }

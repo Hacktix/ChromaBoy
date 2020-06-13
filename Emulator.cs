@@ -71,8 +71,9 @@ namespace ChromaBoy
 
         protected override void Draw(RenderContext context)
         {
-            if(PPU.CanDraw)
+            if(PPU.CanDraw && PPU.HasUpdated)
             {
+                PPU.HasUpdated = false;
                 context.RenderTo(Frame, () =>
                 {
                     for (int x = 0; x < SCREEN_WIDTH; x++)
