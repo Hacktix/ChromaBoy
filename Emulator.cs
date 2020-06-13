@@ -22,10 +22,11 @@ namespace ChromaBoy
 
         public static Dictionary<byte, Color> ShadeColorMap = new Dictionary<byte, Color>()
         {
-            { 0, new Color(224, 248, 207) },
-            { 1, new Color(134, 192, 108) },
-            { 2, new Color(48, 104, 80) },
-            { 3, new Color(7, 23, 32) }
+            { 0, new Color(155, 188, 15) },
+            { 1, new Color(139, 172, 15) },
+            { 2, new Color(48, 98, 48) },
+            { 3, new Color(15, 56, 15) },
+            { 4, new Color(202, 220, 159) }
         };
 
         private Gameboy Gameboy;

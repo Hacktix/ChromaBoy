@@ -204,7 +204,7 @@ namespace ChromaBoy.Hardware
                 }
                 else
                 {
-                    Background[bSLX, ly] = 0;
+                    Background[bSLX, ly] = 4;
                     if (++bSLX == 0)
                         {
                             bSLX = 0;
