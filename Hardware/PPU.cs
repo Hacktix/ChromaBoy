@@ -7,6 +7,7 @@ namespace ChromaBoy.Hardware
     {
         private Gameboy parent;
         private long PPUCycles = 0;
+        private long TimeoutCycles = 0;
         private byte DMACount = 0;
         private bool LineDone = false;
         private byte LastMode = 255;
@@ -14,10 +15,12 @@ namespace ChromaBoy.Hardware
         private bool lastStatRequest = false;
         private byte bSLX = 0;
         private byte lastLY = 255;
+        private bool handledScrollTimeout = false;
 
         private bool WindowEnable = false;
         private byte WX = 0;
         private byte WY = 0;
+        private byte WindowLineCount = 0;
 
         private ushort BGTilemapBaseAddr = 0x9800;
         private ushort BGTileDataBaseAddr = 0x8000;
@@ -37,6 +40,12 @@ namespace ChromaBoy.Hardware
 
         public void ProcessCycle()
         {
+            if(TimeoutCycles > 0)
+            {
+                TimeoutCycles--;
+                return;
+            }
+
             // Set LY
             byte ly = (byte)(PPUCycles / 456);
             parent.Memory[0xFF44] = ly;
@@ -87,6 +96,8 @@ namespace ChromaBoy.Hardware
                     case 2:
                         if ((parent.Memory[0xFF41] & 0b100000) != 0) statRequest = true;
                         LineDone = false;
+                        WindowLineCount = 0;
+                        handledScrollTimeout = false;
                         break;
                 }
             }
@@ -122,6 +133,13 @@ namespace ChromaBoy.Hardware
             // Draw Frame
             if (mode == 3)
             {
+                if(bSLX == 0 && !handledScrollTimeout && (parent.Memory.Get(0xFF43) % 8) > 0)
+                {
+                    handledScrollTimeout = true;
+                    TimeoutCycles = (parent.Memory.Get(0xFF43) % 8) - 1;
+                    return;
+                }
+
                 if ((parent.Memory[0xFF40] & 128) > 0)
                 {
                     // Update Base Addresses
@@ -138,7 +156,7 @@ namespace ChromaBoy.Hardware
                     {
                         // Draw Window
                         byte tmpX = (byte)(bSLX - WX);
-                        byte tmpY = (byte)(ly - WY);
+                        byte tmpY = WindowLineCount;
 
                         int tileOffset = (tmpY % 8) * 2;
                         byte tileNo = parent.Memory.Get(WDTilemapBaseAddr + (tmpX / 8) + 32 * (tmpY / 8));
@@ -153,7 +171,12 @@ namespace ChromaBoy.Hardware
 
                         Background[bSLX, ly] = shade;
 
-                        if(++bSLX == 0) LineDone = true;
+                        if (++bSLX == 0)
+                        {
+                            bSLX = 0;
+                            LineDone = true;
+                            WindowLineCount++;
+                        }
                     }
                     else
                     {
@@ -171,13 +194,21 @@ namespace ChromaBoy.Hardware
 
                         Background[(byte)(bSLX - parent.Memory.Get(0xFF43)), (byte)(ly - parent.Memory.Get(0xFF42))] = shade;
 
-                        if (++bSLX == 0) LineDone = true;
+                        if (++bSLX == 0)
+                        {
+                            bSLX = 0;
+                            LineDone = true;
+                        }
                     }
                 }
                 else
                 {
                     Background[bSLX, ly] = 0;
-                    if (++bSLX == 0) LineDone = true;
+                    if (++bSLX == 0)
+                        {
+                            bSLX = 0;
+                            LineDone = true;
+                        }
                 }
             }
 
