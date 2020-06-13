@@ -33,6 +33,7 @@ namespace ChromaBoy
 
         public Emulator()
         {
+            Graphics.VSyncEnabled = false;
             Window.GoWindowed((ushort)(SCREEN_WIDTH * SCALE_FACTOR), (ushort)(SCREEN_HEIGHT * SCALE_FACTOR));
             Frame = new RenderTarget((ushort)SCREEN_WIDTH, (ushort)SCREEN_HEIGHT);
             Frame.FilteringMode = TextureFilteringMode.NearestNeighbor;
@@ -69,16 +70,19 @@ namespace ChromaBoy
 
         protected override void Draw(RenderContext context)
         {
-            context.RenderTo(Frame, () =>
+            if(PPU.CanDraw)
             {
-                for (int x = 0; x < SCREEN_WIDTH; x++)
+                context.RenderTo(Frame, () =>
                 {
-                    for (int y = 0; y < SCREEN_HEIGHT; y++)
+                    for (int x = 0; x < SCREEN_WIDTH; x++)
                     {
-                        context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[PPU.Display[x, y]]);
+                        for (int y = 0; y < SCREEN_HEIGHT; y++)
+                        {
+                            context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[PPU.Display[x, y]]);
+                        }
                     }
-                }
-            });
+                });
+            }
             
             context.DrawTexture(Frame, Vector2.Zero, SCALE_VECTOR, Vector2.Zero, 0f);
         }

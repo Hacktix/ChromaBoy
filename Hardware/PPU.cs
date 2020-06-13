@@ -26,6 +26,7 @@ namespace ChromaBoy.Hardware
         private ushort BGTileDataBaseAddr = 0x8000;
         private ushort WDTilemapBaseAddr = 0x9800;
 
+        public static bool CanDraw = false;
         public static byte[,] Display = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public static byte[,] Background = new byte[256, 256];
         public static byte[,] Window = new byte[256, 256];
@@ -219,6 +220,7 @@ namespace ChromaBoy.Hardware
 
         private void MergeToDisplay()
         {
+            CanDraw = false;
             for(int x = 0; x < Emulator.SCREEN_WIDTH; x++)
             {
                 for(int y = 0; y < Emulator.SCREEN_HEIGHT; y++)
@@ -226,6 +228,7 @@ namespace ChromaBoy.Hardware
                     Display[x, y] = Background[x, y];
                 }
             }
+            CanDraw = true;
         }
     }
 }
