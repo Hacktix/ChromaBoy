@@ -170,7 +170,7 @@ namespace ChromaBoy.Hardware
                         byte color = (byte)(lc | uc);
                         byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
-                        Background[bSLX, ly] = shade;
+                        Background[bSLX, ly] = (byte)(shade+1);
 
                         if (++bSLX == 0)
                         {
@@ -193,7 +193,7 @@ namespace ChromaBoy.Hardware
                         byte color = (byte)(lc | uc);
                         byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
-                        Background[(byte)(bSLX - parent.Memory.Get(0xFF43)), (byte)(ly - parent.Memory.Get(0xFF42))] = shade;
+                        Background[(byte)(bSLX - parent.Memory.Get(0xFF43)), (byte)(ly - parent.Memory.Get(0xFF42))] = (byte)(shade+1);
 
                         if (++bSLX == 0)
                         {
@@ -204,7 +204,7 @@ namespace ChromaBoy.Hardware
                 }
                 else
                 {
-                    Background[bSLX, ly] = 4;
+                    Background[bSLX, ly] = 1;
                     if (++bSLX == 0)
                         {
                             bSLX = 0;

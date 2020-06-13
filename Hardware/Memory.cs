@@ -8,15 +8,17 @@ namespace ChromaBoy.Hardware
         private MemoryBankController MBC;
         public byte[] ROM;
         public byte[] RAM;
+        public byte[] BOOTROM;
         private Gameboy parent;
 
         public bool UpdatedSTAT = false;
 
-        public Memory(MemoryBankController MBC, byte[] ROM, Gameboy parent)
+        public Memory(MemoryBankController MBC, byte[] ROM, Gameboy parent, byte[] bootrom = null)
         {
             this.MBC = MBC;
             this.ROM = ROM;
             this.RAM = new byte[0x10000];
+            this.BOOTROM = bootrom;
             this.parent = parent;
         }
 
@@ -43,6 +45,9 @@ namespace ChromaBoy.Hardware
         {
             get
             {
+                // Bootrom Translation
+                if(i <= 0xFF && BOOTROM != null && RAM[0xFF50] == 0) return BOOTROM[i];
+
                 // VRAM & OAM Lock
                 if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3) return 0xFF;
                 if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1) return 0xFF;

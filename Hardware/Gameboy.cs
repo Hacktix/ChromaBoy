@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Decoder = ChromaBoy.Software.Decoder;
 
 namespace ChromaBoy.Hardware
@@ -45,8 +46,17 @@ namespace ChromaBoy.Hardware
 
         public Gameboy(byte[] ROM)
         {
+            byte[] bootrom = new byte[0];
+            if (File.Exists("boot.bin")) bootrom = File.ReadAllBytes("boot.bin");
+            if(bootrom.Length != 0 && bootrom.Length != 256) bootrom = new byte[0];
+
             Cartridge = new Cartridge(ROM);
-            Memory = new Memory(Cartridge.MemoryBankController, ROM, this);
+            if (bootrom.Length == 0) Memory = new Memory(Cartridge.MemoryBankController, ROM, this);
+            else
+            {
+                Memory = new Memory(Cartridge.MemoryBankController, ROM, this, bootrom);
+                PC = 0;
+            }
             PPU = new PPU(this);
 
             PerformanceTimer = new Stopwatch();
