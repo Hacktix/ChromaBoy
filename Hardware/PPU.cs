@@ -165,8 +165,8 @@ namespace ChromaBoy.Hardware
                         ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
                         ushort bmp = (ushort)(0b1000000010000000 >> (tmpX % 8));
 
-                        byte lc = (byte)((tileData & bmp) >> (7 - (tmpX % 8)));
-                        byte uc = (byte)((tileData & bmp) >> (14 - (tmpX % 8)));
+                        byte lc = (byte)(((tileData & bmp) >> (7 - (tmpX % 8))) << 1);
+                        byte uc = (byte)(((tileData & bmp) >> (14 - (tmpX % 8))) >> 1);
                         byte color = (byte)(lc | uc);
                         byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
@@ -188,8 +188,8 @@ namespace ChromaBoy.Hardware
                         ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
                         ushort bmp = (ushort)(0b1000000010000000 >> (bSLX % 8));
 
-                        byte lc = (byte)((tileData & bmp) >> (7 - (bSLX % 8)));
-                        byte uc = (byte)((tileData & bmp) >> (14 - (bSLX % 8)));
+                        byte lc = (byte)(((tileData & bmp) >> (7 - (bSLX % 8))) << 1);
+                        byte uc = (byte)(((tileData & bmp) >> (14 - (bSLX % 8))) >> 1);
                         byte color = (byte)(lc | uc);
                         byte shade = color == 0 ? (byte)(parent.Memory.Get(0xFF47) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(0xFF47) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(0xFF47) & 0b110000) >> 4) : (byte)((parent.Memory.Get(0xFF47) & 0b11000000) >> 6);
 
