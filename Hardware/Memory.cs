@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace ChromaBoy.Hardware
+﻿namespace ChromaBoy.Hardware
 {
     public class Memory
     {
@@ -12,6 +9,8 @@ namespace ChromaBoy.Hardware
         private Gameboy parent;
 
         public bool UpdatedSTAT = false;
+        public bool LockVRAM = false;
+        public bool LockOAM = false;
 
         public Memory(MemoryBankController MBC, byte[] ROM, Gameboy parent, byte[] bootrom = null)
         {
@@ -49,8 +48,8 @@ namespace ChromaBoy.Hardware
                 if(i <= 0xFF && BOOTROM != null && RAM[0xFF50] == 0) return BOOTROM[i];
 
                 // VRAM & OAM Lock
-                if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3) return 0xFF;
-                if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1) return 0xFF;
+                //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return 0xFF;
+                //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return 0xFF;
 
                 // Inputs
                 if (i == 0xFF00)
@@ -72,8 +71,8 @@ namespace ChromaBoy.Hardware
             set
             {
                 // VRAM & OAM Lock
-                if (i >= 0x8000 && i <= 0x9FFF && (RAM[0xFF41] & 3) == 3 && (RAM[0xFF40] & 128) != 0) return;
-                if (i >= 0xFE00 && i <= 0xFE9F && (RAM[0xFF41] & 3) > 1 && (RAM[0xFF40] & 128) != 0) return;
+                //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return;
+                //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
 
                 switch (i)
                 {

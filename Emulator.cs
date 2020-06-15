@@ -4,7 +4,6 @@ using Chroma.Input.EventArgs;
 using ChromaBoy.Hardware;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Numerics;
 
 namespace ChromaBoy
@@ -129,16 +128,15 @@ namespace ChromaBoy
 
         protected override void Draw(RenderContext context)
         {
-            if(PPU.CanDraw && PPU.HasUpdated)
+            if(Gameboy.PPU.CanDraw)
             {
-                PPU.HasUpdated = false;
                 context.RenderTo(Frame, () =>
                 {
                     for (int x = 0; x < SCREEN_WIDTH; x++)
                     {
                         for (int y = 0; y < SCREEN_HEIGHT; y++)
                         {
-                            context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[PPU.Display[x, y]]);
+                            context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCD[x, y]]);
                         }
                     }
                 });
