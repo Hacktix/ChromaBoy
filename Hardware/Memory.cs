@@ -95,7 +95,7 @@ namespace ChromaBoy.Hardware
                         break;
                     case 0xFF46:
                         DMATransfer = true;
-                        DMAAddr = (ushort)(100 * value);
+                        DMAAddr = (ushort)(0x100 * value);
                         break;
                     default:
                         if (MBC.HandleWrite(i, value))

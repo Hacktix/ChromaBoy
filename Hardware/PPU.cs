@@ -40,6 +40,7 @@ namespace ChromaBoy.Hardware
         private ushort WindowTilemapBaseAddr = 0x9800;
         private ushort BackgroundTileDataBaseAddr = 0x8800;
         private ushort BackgroundTilemapBaseAddr = 0x9800;
+        private byte DMACount = 0;
 
         // # Buffers, temporary variables, etc.
         private bool lastStatRequest = false;
@@ -83,8 +84,21 @@ namespace ChromaBoy.Hardware
             }
             else if(parent.Memory.UpdatedSTAT) parent.Memory.UpdatedSTAT = false;
 
+            // Handle OAM DMA Transfer
+            if (parent.Memory.DMATransfer)
+            {
+                parent.Memory.Set(0xFE00 + DMACount, parent.Memory.Get(parent.Memory.DMAAddr + DMACount));
+                DMACount++;
+                if (DMACount > 0x9F)
+                {
+                    DMACount = 0;
+                    parent.Memory.DMAAddr = 0;
+                    parent.Memory.DMATransfer = false;
+                }
+            }
+
             // Do calculations or whatever
-            switch(Mode)
+            switch (Mode)
             {
                 case 2: // OAM Scan
                     ProcessOAMTick();
