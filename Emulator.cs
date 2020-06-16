@@ -15,7 +15,7 @@ namespace ChromaBoy
         public static readonly int SCALE_FACTOR = 4;
         public static readonly Vector2 SCALE_VECTOR = new Vector2(SCALE_FACTOR, SCALE_FACTOR);
 
-        public static readonly int CYCLES_PER_UPDATE = 3000000;
+        public static readonly int CYCLES_PER_UPDATE = 3500000;
         public static readonly int UPDATE_FREQUENCY = 1000 / (4194304 / CYCLES_PER_UPDATE);
 
         private static readonly int PERFORMANCE_BUFFER_LENGTH = 100;
