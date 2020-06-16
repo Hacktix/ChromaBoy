@@ -168,7 +168,7 @@ namespace ChromaBoy.Hardware
 
             if (hasSprite)
             {
-                if (spritePixel == 0 || (!objPriority && backgroundPixel != 0)) LCD[LX, LY] = backgroundPixel;
+                if (spritePixel == 255 || (!objPriority && backgroundPixel != 0)) LCD[LX, LY] = backgroundPixel;
                 else if (objPriority || backgroundPixel == 0) LCD[LX, LY] = spritePixel;
             }
             else LCD[LX, LY] = backgroundPixel;
@@ -194,7 +194,7 @@ namespace ChromaBoy.Hardware
         {
             List<ObjectSprite> candidates = new List<ObjectSprite>();
             foreach (ObjectSprite sp in scanlineSprites)
-                if (sp.X <= LX && LX < (sp.X + 8)) candidates.Add(sp);
+                if (sp.X <= LX && LX < (sp.X + 8) && GetSpritePixel(sp) != 255) candidates.Add(sp);
             if(candidates.Count == 0) return null;
 
             ObjectSprite sprite = null;

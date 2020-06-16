@@ -45,7 +45,7 @@ namespace ChromaBoy.Software
             byte lc = (byte)(((tileData & bmp) >> (7 - (x % 8))) << 1);
             byte uc = (byte)(((tileData & bmp) >> (14 - (x % 8))) >> 1);
             byte color = (byte)(lc | uc);
-            if (color == 0) return 0;
+            if (color == 0) return 255;
             ushort paletteReg = (ushort)(!HasAttribute(SpriteAttribute.ZeroPalette) ? 0xFF48 : 0xFF49);
             return color == 0 ? (byte)(parent.Memory.Get(paletteReg) & 0b11) : color == 1 ? (byte)((parent.Memory.Get(paletteReg) & 0b1100) >> 2) : color == 2 ? (byte)((parent.Memory.Get(paletteReg) & 0b110000) >> 4) : (byte)((parent.Memory.Get(paletteReg) & 0b11000000) >> 6);
         }
