@@ -1,4 +1,8 @@
-﻿namespace ChromaBoy.Hardware
+﻿using ChromaBoy.Software;
+using System;
+using System.Collections.Generic;
+
+namespace ChromaBoy.Hardware
 {
     public class PPU
     {
@@ -13,6 +17,13 @@
 
         // # PPU Registers
         private byte Mode = 0;
+
+        // * OAM Scans
+        private List<ObjectSprite> scanlineSprites = new List<ObjectSprite>();
+        private ushort scanAddress = 0xFE00;
+        public bool LargeSprites = false;
+
+        // * Drawing
         private byte LY = 255;
         private byte LX = 0;
         private bool EnableWindow = false;
@@ -22,6 +33,7 @@
         private byte SCX = 0;
         private byte SCY = 0;
         private bool DrawBackground = false;
+        private bool DrawSprites = false;
         private bool scrollTimeout = false;
 
         // # Addresses
@@ -75,7 +87,7 @@
             switch(Mode)
             {
                 case 2: // OAM Scan
-                    // TODO: Implement OAM scanning
+                    ProcessOAMTick();
                     break;
                 case 3: // Drawing
                     ProcessDrawTick();
@@ -85,6 +97,21 @@
             // Increment Cycle Count
             PPUCycles++;
             if (PPUCycles == 70224) PPUCycles = 0;
+        }
+
+        private void ProcessOAMTick()
+        {
+            // Limit scan to OAM memory region
+            if (scanAddress > 0xFE9F) return;
+
+            // Fetch sprite data
+            ObjectSprite sprite = new ObjectSprite(parent, scanAddress);
+            scanAddress += 4;
+
+            // Check sprite data & add to buffer
+            int heightCheck = LargeSprites ? 16 : 8;
+            if (LY - sprite.Y >= 0 && LY - sprite.Y < heightCheck && scanlineSprites.Count < 10)
+                scanlineSprites.Add(sprite);
         }
 
         private void ProcessDrawTick()
@@ -109,7 +136,28 @@
                 else backgroundPixel = GetBackgroundPixel();
             }
 
-            LCD[LX, LY] = backgroundPixel;
+            byte spritePixel = 0;
+            bool objPriority = false;
+            bool hasSprite = false;
+            if(DrawSprites)
+            {
+                ObjectSprite sprite = FindSprite();
+                if (sprite != null)
+                {
+                    if (LY == sprite.Y && LX == sprite.X)
+                        TimeoutCycles = 5;
+                    spritePixel = GetSpritePixel(sprite);
+                    objPriority = !sprite.HasAttribute(SpriteAttribute.Priority);
+                    hasSprite = true;
+                }
+            }
+
+            if (hasSprite)
+            {
+                if (spritePixel == 0 || (!objPriority && backgroundPixel != 0)) LCD[LX, LY] = backgroundPixel;
+                else if (objPriority || backgroundPixel == 0) LCD[LX, LY] = spritePixel;
+            }
+            else LCD[LX, LY] = backgroundPixel;
 
             if(++LX == Emulator.SCREEN_WIDTH)
             {
@@ -121,6 +169,31 @@
                     WLY++;
                 }
             }
+        }
+
+        private byte GetSpritePixel(ObjectSprite sprite)
+        {
+            return sprite.GetPixel((byte)(LX - sprite.X), (byte)(LY - sprite.Y));
+        }
+
+        private ObjectSprite FindSprite()
+        {
+            List<ObjectSprite> candidates = new List<ObjectSprite>();
+            foreach (ObjectSprite sp in scanlineSprites)
+                if (sp.X <= LX && LX < (sp.X + 8)) candidates.Add(sp);
+            if(candidates.Count == 0) return null;
+
+            ObjectSprite sprite = null;
+            int lowestX = 255;
+            foreach (ObjectSprite sp in candidates)
+            {
+                if (sp.X < lowestX)
+                {
+                    sprite = sp;
+                    lowestX = sp.X;
+                }
+            }
+            return sprite;
         }
 
         private byte GetBackgroundPixel()
@@ -222,6 +295,8 @@
             SCX = parent.Memory.Get(0xFF43);
             SCY = parent.Memory.Get(0xFF42);
             DrawBackground = (parent.Memory.Get(0xFF40) & 0b1) != 0;
+            DrawSprites = (parent.Memory.Get(0xFF40) & 0b10) != 0;
+            LargeSprites = (parent.Memory.Get(0xFF40) & 0b100) != 0;
 
             // Update memory addresses
             WindowTilemapBaseAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b1000000) == 0 ? 0x9800 : 0x9C00);
@@ -248,6 +323,8 @@
                     parent.Memory.LockOAM = true;
                     parent.Memory.LockVRAM = false;
                     CanDraw = false;
+                    scanAddress = 0xFE00;
+                    scanlineSprites.Clear();
                     break;
                 case 3:
                     parent.Memory.LockOAM = true;
@@ -263,6 +340,7 @@
             LY = 0;
             LX = 0;
             WLY = 0;
+            scanlineSprites.Clear();
 
             lineDone = false;
             drewWindow = false;
