@@ -8,14 +8,17 @@ namespace ChromaBoy.Hardware.MBCs
         public bool HasBattery = false;
 
         private byte ROMBankNumber = 1;
-        private byte RAMBankNumber = 0;
         private byte Mode = 0;
         private byte HiBank = 0;
 
-        // TODO: Implement RAM-Related Features
+        // TODO: Implement battery-buffered RAM
+
+        private byte[] RAM;
+        private bool enabledRAM = false;
 
         public MBC1(int RAMSize, int ROMSize, bool Battery) : base(RAMSize, ROMSize, 0) {
             HasBattery = Battery;
+            RAM = new byte[RAMSize];
         }
 
         public override bool AccessesROM(int address)
@@ -25,12 +28,25 @@ namespace ChromaBoy.Hardware.MBCs
 
         public override bool HandleRead(int address)
         {
-            return false;
+            return address >= 0xA000 && address <= 0xBFFF;
+        }
+
+        public override byte MBCRead(int address)
+        {
+            if (!enabledRAM) return 0xFF;
+            address -= 0xA000;
+            if(Mode != 0) address += 0x2000 * HiBank;
+            return RAM[address % RAM.Length];
         }
 
         public override bool HandleWrite(int address, byte value)
         {
-            if(address >= 0x2000 && address <= 0x3FFF)
+            if(address >= 0x0000 && address <= 0x1FFF)
+            {
+                enabledRAM = (value & 0xF) == 0xA;
+                return false;
+            }
+            else if(address >= 0x2000 && address <= 0x3FFF)
             {
                 ROMBankNumber = (byte)(value & 0x1F);
                 if ((ROMBankNumber & 0b11111) == 0) ROMBankNumber++;
@@ -41,6 +57,10 @@ namespace ChromaBoy.Hardware.MBCs
             }
             else if (address >= 0x6000 && address <= 0x7FFF) {
                 Mode = (byte)(value & 1);
+                return false;
+            } else if(address >= 0xA000 && address <= 0xBFFF)
+            {
+                if(enabledRAM) RAM[((address - 0xA000) + (Mode != 0 ? 0x2000 * HiBank : 0)) % RAM.Length] = value;
                 return false;
             }
 
