@@ -134,7 +134,7 @@ namespace ChromaBoy.Hardware
 
         private void WaitForCycleFinish(Stopwatch timer)
         {
-            while (timer.ElapsedTicks < (1.0 / (4194304 * 2.0)) * TimeSpan.TicksPerSecond) { /* Wait... */ }
+            while (timer.ElapsedTicks < (1.0 / (4194304 * 1.5)) * TimeSpan.TicksPerSecond) { /* Wait... */ }
             timer.Reset();
         }
 

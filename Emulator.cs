@@ -128,20 +128,21 @@ namespace ChromaBoy
 
         protected override void Draw(RenderContext context)
         {
-            if(Gameboy.PPU.CanDraw)
+            if(Gameboy.PPU.HasUpdated)
             {
+                Gameboy.PPU.HasUpdated = false;
                 context.RenderTo(Frame, () =>
                 {
                     for (int x = 0; x < SCREEN_WIDTH; x++)
                     {
                         for (int y = 0; y < SCREEN_HEIGHT; y++)
                         {
-                            context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCD[x, y]]);
+                            context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCDBuffer[x, y]]);
                         }
                     }
                 });
             }
-            
+
             context.DrawTexture(Frame, Vector2.Zero, SCALE_VECTOR, Vector2.Zero, 0f);
         }
     }

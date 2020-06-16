@@ -50,8 +50,8 @@ namespace ChromaBoy.Hardware
 
         // # Frontend Variables
         public byte[,] LCD = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
+        public byte[,] LCDBuffer = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public bool HasUpdated = true;
-        public bool CanDraw = true;
 
         public PPU(Gameboy parent)
         {
@@ -331,12 +331,11 @@ namespace ChromaBoy.Hardware
                     parent.Memory.LockOAM = false;
                     parent.Memory.LockVRAM = false;
                     parent.Memory[0xFF0F] |= 1;
-                    CanDraw = true;
+                    CopyToBuffer();
                     break;
                 case 2:
                     parent.Memory.LockOAM = true;
                     parent.Memory.LockVRAM = false;
-                    CanDraw = false;
                     scanAddress = 0xFE00;
                     scanlineSprites.Clear();
                     break;
@@ -346,6 +345,14 @@ namespace ChromaBoy.Hardware
                     break;
             }
             parent.Memory[0xFF41] = (byte)((parent.Memory[0xFF41] & 0b1111100) | Mode);
+        }
+
+        private void CopyToBuffer()
+        {
+            for (int x = 0; x < Emulator.SCREEN_WIDTH; x++)
+                for (int y = 0; y < Emulator.SCREEN_HEIGHT; y++)
+                    LCDBuffer[x, y] = LCD[x, y];
+            HasUpdated = true;
         }
 
         private void Reset()
