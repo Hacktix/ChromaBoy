@@ -32,7 +32,7 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 # Input / Output
 [~] Video Output
 [ ] Sound Controller
-[ ] Joypad Controls
+[✓] Joypad Controls
 [ ] Serial Data Transfer
 
 # Accessories
