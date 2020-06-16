@@ -193,9 +193,17 @@ namespace ChromaBoy.Hardware
         private ObjectSprite FindSprite()
         {
             List<ObjectSprite> candidates = new List<ObjectSprite>();
+            ObjectSprite wouldApply = null;
             foreach (ObjectSprite sp in scanlineSprites)
-                if (sp.X <= LX && LX < (sp.X + 8) && GetSpritePixel(sp) != 255) candidates.Add(sp);
-            if(candidates.Count == 0) return null;
+            {
+                if (sp.X <= LX && LX < (sp.X + 8))
+                {
+                    if (GetSpritePixel(sp) != 255)
+                        candidates.Add(sp);
+                    else wouldApply = sp;
+                }
+            }
+            if(candidates.Count == 0) return wouldApply;
 
             ObjectSprite sprite = null;
             int lowestX = 255;
