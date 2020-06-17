@@ -295,6 +295,7 @@ namespace ChromaBoy.Hardware
                 checkedSTAT = true;
                 LY = tmpLY;
                 parent.Memory[0xFF44] = LY;
+                parent.Memory.Set(0xFF41, (byte)((parent.Memory[0xFF41] & 0b11111011) | (LY == parent.Memory[0xFF45] ? 0b100 : 0b000)));
 
                 lineDone = false;
             }
