@@ -30,7 +30,7 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 [ ] MMM01
 
 # Input / Output
-[~] Video Output
+[✓] Video Output
 [ ] Sound Controller
 [✓] Joypad Controls
 [ ] Serial Data Transfer
