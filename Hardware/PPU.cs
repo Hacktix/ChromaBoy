@@ -11,6 +11,7 @@ namespace ChromaBoy.Hardware
         // # Cycle-related Variables
         private int PPUCycles = 0;
         private int TimeoutCycles = 0;
+        private int dmaCooldown = 0;
 
         // # Determines whether PPU should be reset due to unset LCD Enable bit
         private bool isReset = false;
@@ -87,13 +88,19 @@ namespace ChromaBoy.Hardware
             // Handle OAM DMA Transfer
             if (parent.Memory.DMATransfer)
             {
-                parent.Memory.Set(0xFE00 + DMACount, parent.Memory.Get(parent.Memory.DMAAddr + DMACount));
-                DMACount++;
-                if (DMACount > 0x9F)
+                if (dmaCooldown > 0)
+                    dmaCooldown--;
+                else
                 {
-                    DMACount = 0;
-                    parent.Memory.DMAAddr = 0;
-                    parent.Memory.DMATransfer = false;
+                    parent.Memory.Set(0xFE00 + DMACount, parent.Memory.Get(parent.Memory.DMAAddr + DMACount));
+                    DMACount++;
+                    if (DMACount > 0x9F)
+                    {
+                        DMACount = 0;
+                        parent.Memory.DMAAddr = 0;
+                        parent.Memory.DMATransfer = false;
+                    }
+                    else dmaCooldown = 3;
                 }
             }
 
