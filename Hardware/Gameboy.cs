@@ -20,6 +20,7 @@ namespace ChromaBoy.Hardware
         public Memory Memory;
         public Cartridge Cartridge;
         public PPU PPU;
+        public APU APU;
 
         public Dictionary<Register, byte> Registers = new Dictionary<Register, byte>()
         { { Register.A, 0x01 }, { Register.F, 0xB0 }, { Register.B, 0x00 }, { Register.C, 0x13 }, { Register.D, 0x00 }, { Register.E, 0xD8 }, { Register.H, 0x01 }, { Register.L, 0x4D } };
@@ -58,6 +59,7 @@ namespace ChromaBoy.Hardware
                 PC = 0;
             }
             PPU = new PPU(this);
+            APU = new APU(this);
 
             PerformanceTimer = new Stopwatch();
             CycleTimer = new Stopwatch();
@@ -74,6 +76,7 @@ namespace ChromaBoy.Hardware
                 CycleCount++;
                 HandleTimers();
                 PPU.ProcessCycle();
+                APU.ProcessCycle();
 
                 if (CycleCooldown > 0)
                 {
@@ -134,7 +137,7 @@ namespace ChromaBoy.Hardware
 
         private void WaitForCycleFinish(Stopwatch timer)
         {
-            while (timer.ElapsedTicks < (1.0 / (4194304 * 2.0)) * TimeSpan.TicksPerSecond) { /* Wait... */ }
+            // while (timer.ElapsedTicks < (1.0 / (4194304 * 1.5)) * TimeSpan.TicksPerSecond) { /* Wait... */ }
             timer.Reset();
         }
 

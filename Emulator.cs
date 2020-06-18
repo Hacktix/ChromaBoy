@@ -1,4 +1,5 @@
 ﻿using Chroma;
+using Chroma.Audio;
 using Chroma.Graphics;
 using Chroma.Input.EventArgs;
 using ChromaBoy.Hardware;
@@ -21,6 +22,8 @@ namespace ChromaBoy
         private static readonly int PERFORMANCE_BUFFER_LENGTH = 100;
         private List<double> PerformanceBuffer = new List<double>();
 
+        public static AudioManager AudioManager;
+
         public static Dictionary<byte, Color> ShadeColorMap = new Dictionary<byte, Color>()
         {
             { 1, new Color(155, 188, 15) },
@@ -41,11 +44,17 @@ namespace ChromaBoy
             Window.GoWindowed((ushort)(SCREEN_WIDTH * SCALE_FACTOR), (ushort)(SCREEN_HEIGHT * SCALE_FACTOR));
             Frame = new RenderTarget((ushort)SCREEN_WIDTH, (ushort)SCREEN_HEIGHT);
             Frame.FilteringMode = TextureFilteringMode.NearestNeighbor;
+            AudioManager = Audio;
         }
 
         public Emulator(byte[] ROM) : this()
         {
             Gameboy = new Gameboy(ROM);
+            Audio.HookPostMixProcessor<float>((chunk, bytes) =>
+            {
+                if(Gameboy.APU != null)
+                    Gameboy.APU.MixAudio(ref chunk);
+            });
             FixedUpdateFrequency = UPDATE_FREQUENCY;
         }
 
