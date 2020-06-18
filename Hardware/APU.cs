@@ -23,6 +23,32 @@ namespace ChromaBoy.Hardware
             // Update Channels
             if(parent.Memory.UpdateAudioChannel1) UpdateChannel1();
             if(parent.Memory.UpdateAudioChannel2) UpdateChannel2();
+
+            // Update Channel 1 Sound Length
+            if ((parent.Memory.Get(0xFF14) & 0b1000000) != 0)
+            {
+                byte nr11 = parent.Memory.Get(0xFF11);
+                if ((nr11 & 0x3F) == 0) ch1.Volume = 0;
+                else if (ch1Len > 0) ch1Len--;
+                else
+                {
+                    parent.Memory[0xFF11] = (byte)(nr11 - 1);
+                    ch1Len = 16384;
+                }
+            }
+
+            // Update Channel 2 Sound Length
+            if ((parent.Memory.Get(0xFF19) & 0b1000000) != 0)
+            {
+                byte nr21 = parent.Memory.Get(0xFF16);
+                if ((nr21 & 0x3F) == 0) ch2.Volume = 0;
+                else if (ch2Len > 0) ch2Len--;
+                else
+                {
+                    parent.Memory[0xFF16] = (byte)(nr21 - 1);
+                    ch2Len = 16384;
+                }
+            }
         }
 
         private void UpdateChannel1()
@@ -41,19 +67,6 @@ namespace ChromaBoy.Hardware
                 case 0b01: ch1.Duty = 0.25f; break;
                 case 0b10: ch1.Duty = 0.5f; break;
                 case 0b11: ch1.Duty = 0.75f; break;
-            }
-
-            // Take care of sound length
-            if((parent.Memory.Get(0xFF14) & 0b1000000) != 0)
-            {
-                byte nr11 = parent.Memory.Get(0xFF11);
-                if ((nr11 & 0x3F) == 0) ch1.Volume = 0;
-                else if (ch1Len > 0) ch1Len--;
-                else
-                {
-                    parent.Memory[0xFF11] = (byte)(nr11 - 1);
-                    ch1Len = 16384;
-                }
             }
 
             // Set Frequency
@@ -77,19 +90,6 @@ namespace ChromaBoy.Hardware
                 case 0b01: ch2.Duty = 0.25f; break;
                 case 0b10: ch2.Duty = 0.5f; break;
                 case 0b11: ch2.Duty = 0.75f; break;
-            }
-
-            // Take care of sound length
-            if ((parent.Memory.Get(0xFF19) & 0b1000000) != 0)
-            {
-                byte nr21 = parent.Memory.Get(0xFF16);
-                if ((nr21 & 0x3F) == 0) ch2.Volume = 0;
-                else if (ch2Len > 0) ch2Len--;
-                else
-                {
-                    parent.Memory[0xFF16] = (byte)(nr21 - 1);
-                    ch2Len = 16384;
-                }
             }
 
             // Set Frequency
