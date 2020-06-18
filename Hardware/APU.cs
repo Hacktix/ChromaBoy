@@ -21,12 +21,15 @@ namespace ChromaBoy.Hardware
         public void ProcessCycle()
         {
             // Update Channels
-            UpdateChannel1();
-            UpdateChannel2();
+            if(parent.Memory.UpdateAudioChannel1) UpdateChannel1();
+            if(parent.Memory.UpdateAudioChannel2) UpdateChannel2();
         }
 
         private void UpdateChannel1()
         {
+            // Reset update flag
+            parent.Memory.UpdateAudioChannel1 = false;
+
             // Set Volume
             byte nr12 = parent.Memory[0xFF12];
             ch1.Volume = (float)(((nr12 & 0xF0) >> 4) / 16.0);
@@ -60,6 +63,9 @@ namespace ChromaBoy.Hardware
 
         private void UpdateChannel2()
         {
+            // Reset update flag
+            parent.Memory.UpdateAudioChannel2 = false;
+
             // Set Volume
             byte nr22 = parent.Memory[0xFF17];
             ch2.Volume = (float)(((nr22 & 0xF0) >> 4) / 16.0);

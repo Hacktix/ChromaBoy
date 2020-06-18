@@ -14,6 +14,9 @@ namespace ChromaBoy.Hardware
         public bool LockVRAM = false;
         public bool LockOAM = false;
 
+        public bool UpdateAudioChannel1 = false;
+        public bool UpdateAudioChannel2 = false;
+
         public Memory(MemoryBankController MBC, byte[] ROM, Gameboy parent, byte[] bootrom = null)
         {
             this.MBC = MBC;
@@ -75,6 +78,10 @@ namespace ChromaBoy.Hardware
                 // VRAM & OAM Lock
                 //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return;
                 //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
+
+                // Audio Channel Updates
+                if (i >= 0xFF10 && i <= 0xFF14) UpdateAudioChannel1 = true;
+                else if (i >= 0xFF16 && i <= 0xFF19) UpdateAudioChannel2 = true;
 
                 switch (i)
                 {
