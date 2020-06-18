@@ -7,8 +7,8 @@ namespace ChromaBoy.Hardware
     {
         private Gameboy parent;
 
-        private SquareWave ch1 = new SquareWave(Emulator.AudioManager, 0f, 0f);
-        private SquareWave ch2 = new SquareWave(Emulator.AudioManager, 0f, 0f);
+        private PulseWave ch1 = new PulseWave(Emulator.AudioManager, 0f, 0f);
+        private PulseWave ch2 = new PulseWave(Emulator.AudioManager, 0f, 0f);
 
         private int ch1Len = 16384;
         private int ch2Len = 16384;
@@ -30,6 +30,15 @@ namespace ChromaBoy.Hardware
             // Set Volume
             byte nr12 = parent.Memory[0xFF12];
             ch1.Volume = (float)(((nr12 & 0xF0) >> 4) / 16.0);
+
+            // Set Duty
+            ch1.Duty = 0.125f;
+            switch((parent.Memory[0xFF11] & 0b11000000) >> 6)
+            {
+                case 0b01: ch1.Duty = 0.25f; break;
+                case 0b10: ch1.Duty = 0.5f; break;
+                case 0b11: ch1.Duty = 0.75f; break;
+            }
 
             // Take care of sound length
             if((parent.Memory.Get(0xFF14) & 0b1000000) != 0)
@@ -54,6 +63,15 @@ namespace ChromaBoy.Hardware
             // Set Volume
             byte nr22 = parent.Memory[0xFF17];
             ch2.Volume = (float)(((nr22 & 0xF0) >> 4) / 16.0);
+
+            // Set Duty
+            ch2.Duty = 0.125f;
+            switch ((parent.Memory[0xFF16] & 0b11000000) >> 6)
+            {
+                case 0b01: ch2.Duty = 0.25f; break;
+                case 0b10: ch2.Duty = 0.5f; break;
+                case 0b11: ch2.Duty = 0.75f; break;
+            }
 
             // Take care of sound length
             if ((parent.Memory.Get(0xFF19) & 0b1000000) != 0)
