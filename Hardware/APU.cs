@@ -10,8 +10,10 @@ namespace ChromaBoy.Hardware
         private PulseWave ch1 = new PulseWave(Emulator.AudioManager, 0f, 0f);
         private PulseWave ch2 = new PulseWave(Emulator.AudioManager, 0f, 0f);
 
-        private int ch1Len = 16384;
-        private int ch2Len = 16384;
+        private byte ch1Len = 0;
+        private byte ch2Len = 0;
+
+        private long apuCycles = 0;
 
         public APU(Gameboy parent)
         {
@@ -24,31 +26,53 @@ namespace ChromaBoy.Hardware
             if(parent.Memory.UpdateAudioChannel1) UpdateChannel1();
             if(parent.Memory.UpdateAudioChannel2) UpdateChannel2();
 
+            // Handle Channel 1 Triggers
+            if(parent.Memory.TriggerAudio1)
+            {
+                parent.Memory.TriggerAudio1 = false;
+                if (ch1Len == 0) ch1Len = 64;
+                ch1.Volume = (float)(((parent.Memory[0xFF12] & 0xF0) >> 4) / 16.0);
+            }
+
             // Update Channel 1 Sound Length
+            if (parent.Memory.UpdateAudioLength1)
+            {
+                parent.Memory.UpdateAudioLength1 = false;
+                ch1Len = (byte)(64 - (parent.Memory[0xFF11] & 0x3F));
+            }
             if ((parent.Memory.Get(0xFF14) & 0b1000000) != 0)
             {
-                byte nr11 = parent.Memory.Get(0xFF11);
-                if ((nr11 & 0x3F) == 0) ch1.Volume = 0;
-                else if (ch1Len > 0) ch1Len--;
-                else
+                if (apuCycles % 16384 == 0 && ch1Len > 0)
                 {
-                    parent.Memory[0xFF11] = (byte)(nr11 - 1);
-                    ch1Len = 16384;
+                    ch1Len--;
                 }
+                if (ch1.Volume != 0 && ch1Len == 0) ch1.Volume = 0;
+            }
+
+            // Handle Channel 2 Triggers
+            if (parent.Memory.TriggerAudio2)
+            {
+                parent.Memory.TriggerAudio2 = false;
+                if (ch2Len == 0) ch2Len = 64;
+                ch2.Volume = (float)(((parent.Memory[0xFF17] & 0xF0) >> 4) / 16.0);
             }
 
             // Update Channel 2 Sound Length
+            if (parent.Memory.UpdateAudioLength1)
+            {
+                parent.Memory.UpdateAudioLength2 = false;
+                ch2Len = (byte)(64 - (parent.Memory[0xFF16] & 0x3F));
+            }
             if ((parent.Memory.Get(0xFF19) & 0b1000000) != 0)
             {
-                byte nr21 = parent.Memory.Get(0xFF16);
-                if ((nr21 & 0x3F) == 0) ch2.Volume = 0;
-                else if (ch2Len > 0) ch2Len--;
-                else
+                if (apuCycles % 16384 == 0 && ch2Len > 0)
                 {
-                    parent.Memory[0xFF16] = (byte)(nr21 - 1);
-                    ch2Len = 16384;
+                    ch2Len--;
                 }
+                if (ch2.Volume != 0 && ch2Len == 0) ch2.Volume = 0;
             }
+
+            if (++apuCycles == 65536) apuCycles = 0;
         }
 
         private void UpdateChannel1()

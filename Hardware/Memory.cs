@@ -16,6 +16,10 @@ namespace ChromaBoy.Hardware
 
         public bool UpdateAudioChannel1 = false;
         public bool UpdateAudioChannel2 = false;
+        public bool UpdateAudioLength1 = false;
+        public bool UpdateAudioLength2 = false;
+        public bool TriggerAudio1 = false;
+        public bool TriggerAudio2 = false;
 
         public Memory(MemoryBankController MBC, byte[] ROM, Gameboy parent, byte[] bootrom = null)
         {
@@ -82,6 +86,12 @@ namespace ChromaBoy.Hardware
                 // Audio Channel Updates
                 if (i >= 0xFF10 && i <= 0xFF14) UpdateAudioChannel1 = true;
                 else if (i >= 0xFF16 && i <= 0xFF19) UpdateAudioChannel2 = true;
+
+                if (i == 0xFF11 && (value & 0x3F) != (RAM[0xFF11] & 0x3F)) UpdateAudioLength1 = true;
+                else if (i == 0xFF16 && (value & 0x3F) != (RAM[0xFF16] & 0x3F)) UpdateAudioLength2 = true;
+
+                if (i == 0xFF14 && (value & 128) != 0) TriggerAudio1 = true;
+                else if (i == 0xFF19 && (value & 128) != 0) TriggerAudio2 = true;
 
                 switch (i)
                 {
