@@ -53,7 +53,11 @@ namespace ChromaBoy
             Audio.HookPostMixProcessor<float>((chunk, bytes) =>
             {
                 if(Gameboy.APU != null)
+                {
                     Gameboy.APU.MixAudio(ref chunk);
+                    for (int i = 0; i < chunk.Length; i++)
+                        chunk[i] = (float)(chunk[i] * 0.1);
+                }
             });
             FixedUpdateFrequency = UPDATE_FREQUENCY;
         }
