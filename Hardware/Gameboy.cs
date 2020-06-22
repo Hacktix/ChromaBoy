@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using Decoder = ChromaBoy.Software.Decoder;
 
 namespace ChromaBoy.Hardware
@@ -48,8 +49,8 @@ namespace ChromaBoy.Hardware
         public Gameboy(byte[] ROM)
         {
             byte[] bootrom = new byte[0];
-            if (File.Exists("boot.bin")) bootrom = File.ReadAllBytes("boot.bin");
-            if(bootrom.Length != 0 && bootrom.Length != 256) bootrom = new byte[0];
+            if (File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "boot.bin"))) bootrom = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "boot.bin"));
+            if (bootrom.Length != 0 && bootrom.Length != 256) bootrom = new byte[0];
 
             Cartridge = new Cartridge(ROM);
             if (bootrom.Length == 0) Memory = new Memory(Cartridge.MemoryBankController, ROM, this);
