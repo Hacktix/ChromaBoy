@@ -26,7 +26,7 @@ namespace ChromaBoy.Hardware
         public Dictionary<Register, byte> Registers = new Dictionary<Register, byte>()
         { { Register.A, 0x01 }, { Register.F, 0xB0 }, { Register.B, 0x00 }, { Register.C, 0x13 }, { Register.D, 0x00 }, { Register.E, 0xD8 }, { Register.H, 0x01 }, { Register.L, 0x4D } };
         public ushort PC = 0x100;
-        public ushort SP = 0;
+        public ushort SP = 0xFFFE;
 
         public bool Halted = false;
         public bool Standby = false;
@@ -46,7 +46,7 @@ namespace ChromaBoy.Hardware
 
         private Opcode ExecOpcode;
 
-        private bool logTrace = true;
+        private bool logTrace = false;
         private StreamWriter logWriter;
 
         public Gameboy(byte[] ROM)
@@ -56,7 +56,11 @@ namespace ChromaBoy.Hardware
             if (bootrom.Length != 0 && bootrom.Length != 256) bootrom = new byte[0];
 
             Cartridge = new Cartridge(ROM);
-            if (bootrom.Length == 0) Memory = new Memory(Cartridge.MemoryBankController, ROM, this);
+            if (bootrom.Length == 0)
+            {
+                Memory = new Memory(Cartridge.MemoryBankController, ROM, this);
+                InitRegisters();
+            }
             else
             {
                 Memory = new Memory(Cartridge.MemoryBankController, ROM, this, bootrom);
@@ -69,6 +73,46 @@ namespace ChromaBoy.Hardware
 
             PerformanceTimer = new Stopwatch();
             CycleTimer = new Stopwatch();
+        }
+
+        private void InitRegisters()
+        {
+            WriteRegister16(Register16.AF, 0x01B0);
+            WriteRegister16(Register16.BC, 0x0013);
+            WriteRegister16(Register16.DE, 0x00D8);
+            WriteRegister16(Register16.HL, 0x014D);
+            SP = 0xFFFE;
+            Memory.Set(0xFF05, 0x00);
+            Memory.Set(0xFF06, 0x00);
+            Memory.Set(0xFF07, 0x00);
+            Memory.Set(0xFF10, 0x80);
+            Memory.Set(0xFF11, 0xBF);
+            Memory.Set(0xFF12, 0xF3);
+            Memory.Set(0xFF14, 0xBF);
+            Memory.Set(0xFF16, 0x3F);
+            Memory.Set(0xFF17, 0x00);
+            Memory.Set(0xFF19, 0xBF);
+            Memory.Set(0xFF1A, 0x7F);
+            Memory.Set(0xFF1B, 0xFF);
+            Memory.Set(0xFF1C, 0x9F);
+            Memory.Set(0xFF1E, 0xBF);
+            Memory.Set(0xFF20, 0xFF);
+            Memory.Set(0xFF21, 0x00);
+            Memory.Set(0xFF22, 0x00);
+            Memory.Set(0xFF23, 0xBF);
+            Memory.Set(0xFF24, 0x77);
+            Memory.Set(0xFF25, 0xF3);
+            Memory.Set(0xFF26, 0xF1);
+            Memory.Set(0xFF40, 0x91);
+            Memory.Set(0xFF42, 0x00);
+            Memory.Set(0xFF43, 0x00);
+            Memory.Set(0xFF45, 0x00);
+            Memory.Set(0xFF47, 0xFC);
+            Memory.Set(0xFF48, 0xFF);
+            Memory.Set(0xFF49, 0xFF);
+            Memory.Set(0xFF4A, 0x00);
+            Memory.Set(0xFF4B, 0x00);
+            Memory.Set(0xFFFF, 0x00);
         }
 
         public void EmulateCycles(long cycleLimit)
