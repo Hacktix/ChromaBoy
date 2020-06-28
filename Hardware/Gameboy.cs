@@ -46,6 +46,9 @@ namespace ChromaBoy.Hardware
 
         private Opcode ExecOpcode;
 
+        private bool logTrace = true;
+        private StreamWriter logWriter;
+
         public Gameboy(byte[] ROM)
         {
             byte[] bootrom = new byte[0];
@@ -61,6 +64,8 @@ namespace ChromaBoy.Hardware
             }
             PPU = new PPU(this);
             APU = new APU(this);
+
+            if (logTrace) logWriter = new StreamWriter(File.OpenWrite("log.txt"));
 
             PerformanceTimer = new Stopwatch();
             CycleTimer = new Stopwatch();
@@ -117,6 +122,7 @@ namespace ChromaBoy.Hardware
                 }
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
+                if (logTrace) LogTrace(Memory.Get(PC));
                 if (opcode.TickAccurate) ExecOpcode = opcode;
                 else ExecOpcode = null;
 
@@ -134,6 +140,23 @@ namespace ChromaBoy.Hardware
             }
 
             EndTime = PerformanceTimer.ElapsedTicks;
+        }
+
+        private void LogTrace(byte opcode)
+        {
+            logWriter.WriteLine("A: " + Registers[Register.A].ToString("X2") + " " +
+                "F: " + Registers[Register.F].ToString("X2") + " " +
+                "B: " + Registers[Register.B].ToString("X2") + " " +
+                "C: " + Registers[Register.C].ToString("X2") + " " +
+                "D: " + Registers[Register.D].ToString("X2") + " " +
+                "E: " + Registers[Register.E].ToString("X2") + " " +
+                "H: " + Registers[Register.H].ToString("X2") + " " +
+                "L: " + Registers[Register.L].ToString("X2") + " " +
+                "SP: " + SP.ToString("X4") + " " +
+                "PC: 00:" + PC.ToString("X4") + " | " +
+                opcode.ToString("X2")
+            );
+            logWriter.Flush();
         }
 
         private void WaitForCycleFinish(Stopwatch timer)
