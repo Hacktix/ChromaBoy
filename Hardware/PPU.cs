@@ -324,7 +324,7 @@ namespace ChromaBoy.Hardware
 
             // Update registers from memory
             EnableWindow = (parent.Memory[0xFF40] & 0b100000) > 0;
-            WX = (byte)(parent.Memory.Get(0xFF4B) - 7);
+            WX = (byte)(parent.Memory.Get(0xFF4B) - 7 < 0 ? 0 : parent.Memory.Get(0xFF4B) - 7);
             WY = parent.Memory.Get(0xFF4A);
             SCX = parent.Memory.Get(0xFF43);
             SCY = parent.Memory.Get(0xFF42);
