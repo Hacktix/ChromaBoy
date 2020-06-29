@@ -43,6 +43,7 @@ namespace ChromaBoy.Hardware
         public sbyte TimerReloadCooldown = -1;
 
         private int CycleCooldown = 0;
+        private int cycleSleepInterval = 15000;
 
         private Opcode ExecOpcode;
 
@@ -138,14 +139,14 @@ namespace ChromaBoy.Hardware
                         else HaltBug = false;
                         ExecOpcode = null;
                     }
-                    WaitForCycleFinish(CycleTimer);
+                    WaitForCycleFinish(CycleTimer, cycleCounter);
                     continue;
                 }
 
                 if (CheckForInterrupt())
                 {
                     HandleInterrupt();
-                    WaitForCycleFinish(CycleTimer);
+                    WaitForCycleFinish(CycleTimer, cycleCounter);
                     continue;
                 }
 
@@ -154,7 +155,7 @@ namespace ChromaBoy.Hardware
                     if(CycleCooldown == 0) CycleCooldown += 4;
                     if (CycleCooldown > 0)
                     {
-                        WaitForCycleFinish(CycleTimer);
+                        WaitForCycleFinish(CycleTimer, cycleCounter);
                         continue;
                     }
                 }
@@ -180,7 +181,7 @@ namespace ChromaBoy.Hardware
 
                 CycleCooldown = opcode.Cycles - 1;
 
-                WaitForCycleFinish(CycleTimer);
+                WaitForCycleFinish(CycleTimer, cycleCounter);
             }
 
             EndTime = PerformanceTimer.ElapsedTicks;
@@ -203,9 +204,11 @@ namespace ChromaBoy.Hardware
             logWriter.Flush();
         }
 
-        private void WaitForCycleFinish(Stopwatch timer)
+        private void WaitForCycleFinish(Stopwatch timer, long cycleCounter)
         {
-            while (timer.ElapsedTicks < (1.0 / (4194304 * 1.5)) * TimeSpan.TicksPerSecond) { /* Wait... */ }
+            if (cycleCounter % cycleSleepInterval != 0) return;
+            if (!timer.IsRunning) return;
+            while (timer.ElapsedTicks < (1.0 / 4194304) * TimeSpan.TicksPerSecond * cycleSleepInterval) { /* Wait... */ }
             timer.Reset();
         }
 

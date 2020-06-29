@@ -51,7 +51,7 @@ namespace ChromaBoy
         private void OnQuitRequested(object sender, Chroma.Windowing.EventArgs.CancelEventArgs e)
         {
             Gameboy.Memory.MBC.SaveExternalRam();
-            Environment.Exit(0); // Temporary workaround for window close issue
+            Environment.Exit(0);
         }
 
         public Emulator(byte[] ROM) : this()
