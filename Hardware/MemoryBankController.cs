@@ -1,4 +1,8 @@
-﻿namespace ChromaBoy.Hardware
+﻿using System;
+using System.IO;
+using System.Reflection;
+
+namespace ChromaBoy.Hardware
 {
     public abstract class MemoryBankController
     {
@@ -22,5 +26,29 @@
             return 0xFF;
         }
         public abstract int TranslateAddress(int address);
+        public virtual void SaveExternalRam() { }
+
+        protected static FileStream CreateSave()
+        {
+            string appDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string savefolder = Path.Combine(appDirectory, "saves");
+            string savepath = Path.Combine(savefolder, Path.GetFileName(Program.Filename) + ".sav");
+
+            if (!Directory.Exists(savefolder)) Directory.CreateDirectory(savefolder);
+            if (File.Exists(savepath)) File.Delete(savepath);
+            return File.Create(savepath);
+        }
+
+        protected static FileStream OpenSave()
+        {
+            string appDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string savefolder = Path.Combine(appDirectory, "saves");
+            string savepath = Path.Combine(savefolder, Path.GetFileName(Program.Filename) + ".sav");
+
+            if (!Directory.Exists(savefolder) || !File.Exists(savepath)) return null;
+            return File.OpenRead(savepath);
+        }
+
+        protected virtual void LoadSave() { }
     }
 }

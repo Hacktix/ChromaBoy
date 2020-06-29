@@ -1,5 +1,6 @@
 ﻿using ChromaBoy.Software.Opcodes;
 using System;
+using System.IO;
 
 namespace ChromaBoy.Hardware.MBCs
 {
@@ -11,14 +12,31 @@ namespace ChromaBoy.Hardware.MBCs
         private byte Mode = 0;
         private byte HiBank = 0;
 
-        // TODO: Implement battery-buffered RAM
-
         private byte[] RAM;
         private bool enabledRAM = false;
 
         public MBC1(int RAMSize, int ROMSize, bool Battery) : base(RAMSize, ROMSize, 0) {
             HasBattery = Battery;
             RAM = new byte[RAMSize];
+            if (HasBattery) LoadSave();
+        }
+
+        protected override void LoadSave()
+        {
+            FileStream saveFile = OpenSave();
+            if (saveFile == null) return;
+            saveFile.Read(RAM);
+            saveFile.Close();
+        }
+
+        public override void SaveExternalRam()
+        {
+            if(HasBattery)
+            {
+                FileStream savefile = CreateSave();
+                savefile.Write(RAM);
+                savefile.Close();
+            }
         }
 
         public override bool AccessesROM(int address)

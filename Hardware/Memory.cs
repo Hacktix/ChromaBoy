@@ -4,7 +4,7 @@ namespace ChromaBoy.Hardware
 {
     public class Memory
     {
-        private MemoryBankController MBC;
+        public MemoryBankController MBC;
         public byte[] ROM;
         public byte[] RAM;
         public byte[] BOOTROM;

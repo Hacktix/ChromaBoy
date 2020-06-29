@@ -45,6 +45,13 @@ namespace ChromaBoy
             Frame = new RenderTarget((ushort)SCREEN_WIDTH, (ushort)SCREEN_HEIGHT);
             Frame.FilteringMode = TextureFilteringMode.NearestNeighbor;
             AudioManager = Audio;
+            Window.QuitRequested += OnQuitRequested;
+        }
+
+        private void OnQuitRequested(object sender, Chroma.Windowing.EventArgs.CancelEventArgs e)
+        {
+            Console.WriteLine("Saving RAM...");
+            Gameboy.Memory.MBC.SaveExternalRam();
         }
 
         public Emulator(byte[] ROM) : this()
