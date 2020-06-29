@@ -1,6 +1,4 @@
-﻿using ChromaBoy.Software.Opcodes;
-using System;
-using System.IO;
+﻿using System.IO;
 
 namespace ChromaBoy.Hardware.MBCs
 {

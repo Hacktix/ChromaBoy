@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ChromaBoy.Hardware
+﻿namespace ChromaBoy.Hardware
 {
     public class Memory
     {
