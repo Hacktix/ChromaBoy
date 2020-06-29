@@ -59,7 +59,7 @@ namespace ChromaBoy
             Gameboy = new Gameboy(ROM);
             Audio.HookPostMixProcessor<float>((chunk, bytes) =>
             {
-                if(Gameboy.APU != null)
+                if(Gameboy != null && Gameboy.APU != null)
                 {
                     Gameboy.APU.MixAudio(ref chunk);
                     for (int i = 0; i < chunk.Length; i++)
@@ -71,8 +71,11 @@ namespace ChromaBoy
 
         protected override void FixedUpdate(float fixedDelta)
         {
-            Gameboy.EmulateCycles(CYCLES_PER_UPDATE);
-            UpdateWindowTitle();
+            if(Gameboy != null)
+            {
+                Gameboy.EmulateCycles(CYCLES_PER_UPDATE);
+                UpdateWindowTitle();
+            }
         }
 
         protected override void KeyPressed(KeyEventArgs e)
@@ -148,21 +151,23 @@ namespace ChromaBoy
 
         protected override void Draw(RenderContext context)
         {
-            if(Gameboy.PPU.HasUpdated)
+            if (Gameboy != null)
             {
-                Gameboy.PPU.HasUpdated = false;
-                context.RenderTo(Frame, () =>
+                if (Gameboy.PPU.HasUpdated)
                 {
-                    for (int x = 0; x < SCREEN_WIDTH; x++)
+                    Gameboy.PPU.HasUpdated = false;
+                    context.RenderTo(Frame, () =>
                     {
-                        for (int y = 0; y < SCREEN_HEIGHT; y++)
+                        for (int x = 0; x < SCREEN_WIDTH; x++)
                         {
-                            context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCDBuffer[x, y]]);
+                            for (int y = 0; y < SCREEN_HEIGHT; y++)
+                            {
+                                context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCDBuffer[x, y]]);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
-
             context.DrawTexture(Frame, Vector2.Zero, SCALE_VECTOR, Vector2.Zero, 0f);
         }
     }
