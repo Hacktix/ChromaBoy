@@ -52,6 +52,7 @@ namespace ChromaBoy.Hardware
             switch(ROM[0x0149])
             {
                 case 0x01: ExternalRAMSize = 2048; break;
+                case 0x00:
                 case 0x02: ExternalRAMSize = 8192; break;
                 case 0x03: ExternalRAMSize = 32768; break;
                 case 0x04: ExternalRAMSize = 131072; break;

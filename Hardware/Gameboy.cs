@@ -208,7 +208,7 @@ namespace ChromaBoy.Hardware
         {
             if (cycleCounter % cycleSleepInterval != 0) return;
             if (!timer.IsRunning) return;
-            while (timer.ElapsedTicks < (1.0 / 4194304) * TimeSpan.TicksPerSecond * cycleSleepInterval) { /* Wait... */ }
+            while (timer.ElapsedTicks < (0.99 / 4194304) * TimeSpan.TicksPerSecond * cycleSleepInterval) { /* Wait... */ }
             timer.Reset();
         }
 
