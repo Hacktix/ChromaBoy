@@ -35,7 +35,7 @@ namespace ChromaBoy.Software
             int lt = TileNo & 0xFE;
             int ut = TileNo | 1;
 
-            ushort tileBaseAddr = (ushort)(0x8000 | ((parent.PPU.LargeSprites ? y > 7 ? ut : lt : TileNo) << 4) + 2 * y);
+            ushort tileBaseAddr = (ushort)(0x8000 | ((parent.PPU.LargeSprites ? y > 7 ? ut : lt : TileNo) << 4) + 2 * (y % 8));
             ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
             ushort bmp = (ushort)(0b1000000010000000 >> (x % 8));
 
