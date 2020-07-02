@@ -75,7 +75,7 @@ namespace ChromaBoy.Hardware.MBCs
             }
             if(!enabledRAM)
                 return 0xFF;
-            return RAM[(address - 0xA000) % RAM.Length];
+            return RAM[((address - 0xA000) + ramBank * 0x4000) % RAM.Length];
         }
 
         private void UpdateClockRegisters()
@@ -142,16 +142,21 @@ namespace ChromaBoy.Hardware.MBCs
                 lastLatchValue = value;
                 return false;
             }
-            else if(HasRTC && ramBank >= 0x08 && ramBank <= 0x0C && address >= 0xA000 && address <= 0xBFFF)
+            else if(address >= 0xA000 && address <= 0xBFFF)
             {
-                switch (ramBank)
+                if(HasRTC && ramBank >= 0x08 && ramBank <= 0x0C)
                 {
-                    case 0x08: rtcRegs[RTCRegister.RTC_S] = value; return false;
-                    case 0x09: rtcRegs[RTCRegister.RTC_M] = value; return false;
-                    case 0x0A: rtcRegs[RTCRegister.RTC_H] = value; return false;
-                    case 0x0B: rtcRegs[RTCRegister.RTC_DL] = value; return false;
-                    case 0x0C: rtcRegs[RTCRegister.RTC_DH] = value; return false;
+                    switch (ramBank)
+                    {
+                        case 0x08: rtcRegs[RTCRegister.RTC_S] = value; return false;
+                        case 0x09: rtcRegs[RTCRegister.RTC_M] = value; return false;
+                        case 0x0A: rtcRegs[RTCRegister.RTC_H] = value; return false;
+                        case 0x0B: rtcRegs[RTCRegister.RTC_DL] = value; return false;
+                        case 0x0C: rtcRegs[RTCRegister.RTC_DH] = value; return false;
+                    }
                 }
+                if(RAM.Length > 0 && ramBank <= 3)
+                    RAM[((address - 0xA000) + ramBank * 0x4000) % RAM.Length] = value;
             }
             return true;
         }
