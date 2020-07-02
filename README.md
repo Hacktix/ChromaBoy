@@ -21,7 +21,7 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 # Memory Bank Controllers (MBCs)
 [✓] MBC1
 [ ] MBC2
-[ ] MBC3
+[~] MBC3
 [ ] MBC5
 [ ] MBC6
 [ ] MBC7
