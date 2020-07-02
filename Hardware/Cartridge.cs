@@ -89,10 +89,15 @@ namespace ChromaBoy.Hardware
         {
             switch(CartridgeType)
             {
-                case 0: return new NoMBC(ROM.Length);
-                case 1: return new MBC1(0, ROM.Length, false) ;
-                case 2: return new MBC1(ExternalRAMSize, ROM.Length, false);
-                case 3: return new MBC1(ExternalRAMSize, ROM.Length, true);
+                case 0x00: return new NoMBC(ROM.Length);
+                case 0x01: return new MBC1(0, ROM.Length, false) ;
+                case 0x02: return new MBC1(ExternalRAMSize, ROM.Length, false);
+                case 0x03: return new MBC1(ExternalRAMSize, ROM.Length, true);
+                case 0x0F: return new MBC3(0, ROM.Length, true, true);
+                case 0x10: return new MBC3(ExternalRAMSize, ROM.Length, true, true);
+                case 0x11: return new MBC3(0, ROM.Length, false, false);
+                case 0x12: return new MBC3(ExternalRAMSize, ROM.Length, false, false);
+                case 0x13: return new MBC3(ExternalRAMSize, ROM.Length, true, false);
                 default: throw new NotImplementedException();
             }
         }
