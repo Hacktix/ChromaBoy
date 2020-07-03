@@ -62,7 +62,7 @@ namespace ChromaBoy.Hardware.MBCs
 
         public override byte MBCRead(int address)
         {
-            if(HasRTC && ramBank >= 0x08 && ramBank <= 0x0C)
+            if(ramEnabled && HasRTC && ramBank >= 0x08 && ramBank <= 0x0C)
             {
                 switch (ramBank)
                 {
@@ -119,7 +119,7 @@ namespace ChromaBoy.Hardware.MBCs
         {
             if(address <= 0x1FFF)
             {
-                ramEnabled = value == 0x0A;
+                ramEnabled = (value & 0xF) == 0x0A;
                 return false;
             }
             else if(address <= 0x3FFF)
