@@ -152,7 +152,7 @@ namespace ChromaBoy.Hardware
                 if (EnableWindow && LX >= WX && LY >= WY)
                 {
                     backgroundPixel = GetWindowPixel();
-                    if (!drewWindow) TimeoutCycles = 6;
+                    if (!drewWindow) TimeoutCycles = 5;
                     drewWindow = true;
                 }
                 else backgroundPixel = GetBackgroundPixel();
@@ -168,8 +168,8 @@ namespace ChromaBoy.Hardware
                 {
                     if (LX == sprite.X)
                     {
-                        if(drewWindow) TimeoutCycles = 11 - Math.Min(5, (LX + (255 - WX)) % 8);
-                        else TimeoutCycles = 11 - Math.Min(5, (LX + SCX) % 8);
+                        if(drewWindow) TimeoutCycles = 10 - Math.Min(5, (LX + (255 - WX)) % 8);
+                        else TimeoutCycles = 10 - Math.Min(5, (LX + SCX) % 8);
                     }
                     spritePixel = GetSpritePixel(sprite);
                     objPriority = !sprite.HasAttribute(SpriteAttribute.Priority);
