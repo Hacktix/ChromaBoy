@@ -73,8 +73,6 @@ namespace ChromaBoy.Hardware.MBCs
                     case 0x0C: return rtcRegsLatched[RTCRegister.RTC_DH];
                 }
             }
-            if(!enabledRAM)
-                return 0xFF;
             return RAM[((address - 0xA000) + ramBank * 0x4000) % RAM.Length];
         }
 
@@ -155,7 +153,7 @@ namespace ChromaBoy.Hardware.MBCs
                         case 0x0C: rtcRegs[RTCRegister.RTC_DH] = value; return false;
                     }
                 }
-                if(RAM.Length > 0 && ramBank <= 3)
+                if(RAM.Length > 0 && ramEnabled && ramBank <= 3)
                     RAM[((address - 0xA000) + ramBank * 0x4000) % RAM.Length] = value;
             }
             return true;
