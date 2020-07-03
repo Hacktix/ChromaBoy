@@ -11,11 +11,13 @@ namespace ChromaBoy.Hardware.MBCs
         private byte HiBank = 0;
 
         private byte[] RAM;
+        private bool hasRAM = false;
         private bool enabledRAM = false;
 
         public MBC1(int RAMSize, int ROMSize, bool Battery) : base(RAMSize, ROMSize, 0) {
             HasBattery = Battery;
             RAM = new byte[RAMSize];
+            hasRAM = RAM.Length > 0;
             if (HasBattery) LoadSave();
         }
 
@@ -49,7 +51,7 @@ namespace ChromaBoy.Hardware.MBCs
 
         public override byte MBCRead(int address)
         {
-            if (!enabledRAM) return 0xFF;
+            if (!enabledRAM || !hasRAM) return 0xFF;
             address -= 0xA000;
             if(Mode != 0) address += 0x2000 * HiBank;
             return RAM[address % RAM.Length];
@@ -76,7 +78,7 @@ namespace ChromaBoy.Hardware.MBCs
                 return false;
             } else if(address >= 0xA000 && address <= 0xBFFF)
             {
-                if(enabledRAM) RAM[((address - 0xA000) + (Mode != 0 ? 0x2000 * HiBank : 0)) % RAM.Length] = value;
+                if(enabledRAM && hasRAM) RAM[((address - 0xA000) + (Mode != 0 ? 0x2000 * HiBank : 0)) % RAM.Length] = value;
                 return false;
             }
 
