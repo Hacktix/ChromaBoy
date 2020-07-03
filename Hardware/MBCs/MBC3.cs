@@ -22,7 +22,6 @@ namespace ChromaBoy.Hardware.MBCs
         private long lastStopped = -1;
 
         private byte[] RAM;
-        private bool enabledRAM = false;
 
         public MBC3(int RAMSize, int ROMSize, bool Battery, bool Timer) : base(RAMSize, ROMSize, 0) {
             HasBattery = Battery;
@@ -36,6 +35,11 @@ namespace ChromaBoy.Hardware.MBCs
         {
             FileStream saveFile = OpenSave();
             if (saveFile == null) return;
+            if(HasRTC)
+            {
+                for (int i = 0; i < rtcRegs.Count; i++)
+                    rtcRegs[(RTCRegister)saveFile.ReadByte()] = (byte)saveFile.ReadByte();
+            }
             saveFile.Read(RAM);
             saveFile.Close();
         }
@@ -45,7 +49,18 @@ namespace ChromaBoy.Hardware.MBCs
             if(HasBattery)
             {
                 FileStream savefile = CreateSave();
+
+                // Save RTC Values
+                if(HasRTC)
+                {
+                    foreach(KeyValuePair<RTCRegister, byte> reg in rtcRegs)
+                    {
+                        savefile.WriteByte((byte)reg.Key);
+                        savefile.WriteByte(reg.Value);
+                    }
+                }
                 savefile.Write(RAM);
+                savefile.Flush();
                 savefile.Close();
             }
         }
