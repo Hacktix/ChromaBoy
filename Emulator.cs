@@ -40,7 +40,7 @@ namespace ChromaBoy
 
         public Emulator()
         {
-            Graphics.VSyncEnabled = false;
+            Graphics.VSyncEnabled = true;
             Window.GoWindowed((ushort)(SCREEN_WIDTH * SCALE_FACTOR), (ushort)(SCREEN_HEIGHT * SCALE_FACTOR));
             Frame = new RenderTarget((ushort)SCREEN_WIDTH, (ushort)SCREEN_HEIGHT);
             Frame.FilteringMode = TextureFilteringMode.NearestNeighbor;
