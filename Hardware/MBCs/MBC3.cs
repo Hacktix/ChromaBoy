@@ -95,9 +95,9 @@ namespace ChromaBoy.Hardware.MBCs
         {
             DateTime data = DateTime.Now;
 
-            if(lastUpdated != -1)
+            if(lastUpdated != -1 && lastUpdated > lastStopped)
             {
-                long ticks = data.Ticks - lastUpdated;
+                long ticks = data.Ticks - lastUpdated - (lastStopped != -1 ? (lastUpdated - lastStopped) : 0);
                 long seconds = (ticks / TimeSpan.TicksPerSecond) + rtcRegs[RTCRegister.RTC_S];
                 long minutes = (seconds / 60) + rtcRegs[RTCRegister.RTC_M];
                 seconds %= 60;
@@ -165,7 +165,13 @@ namespace ChromaBoy.Hardware.MBCs
                         case 0x09: rtcRegs[RTCRegister.RTC_M] = value; return false;
                         case 0x0A: rtcRegs[RTCRegister.RTC_H] = value; return false;
                         case 0x0B: rtcRegs[RTCRegister.RTC_DL] = value; return false;
-                        case 0x0C: rtcRegs[RTCRegister.RTC_DH] = value; return false;
+                        case 0x0C:
+                            if ((rtcRegs[RTCRegister.RTC_DH] & 0b1000000) == 0 && (value & 0b1000000) != 0)
+                                lastStopped = DateTime.Now.Ticks;
+                            else if ((value & 0b1000000) == 0)
+                                lastStopped = -1;
+                            rtcRegs[RTCRegister.RTC_DH] = value;
+                            return false;
                     }
                 }
                 if(RAM.Length > 0 && ramEnabled && ramBank <= 3)
