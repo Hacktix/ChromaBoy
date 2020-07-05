@@ -139,7 +139,7 @@ namespace ChromaBoy.Hardware
         {
             if (!scrollTimeout && LX == 0 && (SCX % 8) != 0)
             {
-                TimeoutCycles = (SCX % 8) - 1;
+                TimeoutCycles = (SCX % 8);
                 PPUCycles--;
                 scrollTimeout = true;
                 return;
@@ -152,7 +152,7 @@ namespace ChromaBoy.Hardware
                 if (EnableWindow && LX >= WX && LY >= WY)
                 {
                     backgroundPixel = GetWindowPixel();
-                    if (!drewWindow) TimeoutCycles = 5;
+                    if (!drewWindow) TimeoutCycles = 6;
                     drewWindow = true;
                 }
                 else backgroundPixel = GetBackgroundPixel();
@@ -168,8 +168,8 @@ namespace ChromaBoy.Hardware
                 {
                     if (LX == sprite.X)
                     {
-                        if(drewWindow) TimeoutCycles = 10 - Math.Min(5, (LX + (255 - WX)) % 8);
-                        else TimeoutCycles = 10 - Math.Min(5, (LX + SCX) % 8);
+                        if(drewWindow) TimeoutCycles = 11 - Math.Min(5, (LX + (255 - WX)) % 8);
+                        else TimeoutCycles = 11 - Math.Min(5, (LX + SCX) % 8);
                     }
                     spritePixel = GetSpritePixel(sprite);
                     objPriority = !sprite.HasAttribute(SpriteAttribute.Priority);
@@ -312,7 +312,7 @@ namespace ChromaBoy.Hardware
             }
 
             // Update PPU Mode
-            byte tmpMode = (byte)((PPUCycles % 456) < 80 ? 2 : LY > 143 ? 1 : lineDone ? 0 : 3);
+            byte tmpMode = (byte)((LY > 143 ? 1 : (PPUCycles % 456) < 80 ? 2 : lineDone ? 0 : 3));
             if (Mode != tmpMode)
             {
                 checkedSTAT = true;
