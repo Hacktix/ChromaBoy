@@ -30,6 +30,8 @@ namespace ChromaBoy.Hardware
             TickChannel1();
             if(parent.Memory.UpdateAudioChannel2) UpdateChannel2();
             TickChannel2();
+
+            apuCycles++;
         }
 
         private void TickChannel1()
@@ -54,8 +56,13 @@ namespace ChromaBoy.Hardware
             if ((parent.Memory.Get(0xFF14) & 0b1000000) != 0)
             {
                 if (apuCycles % 16384 == 0 && ch1Len > 0)
+                {
                     ch1Len--;
-                if (ch1Vol != 0 && ch1Len == 0) ch1Vol = 0;
+                }
+                if (ch1Vol != 0 && ch1Len == 0)
+                {
+                    ch1Vol = 0;
+                }
             }
 
             // Set Sound Volume
@@ -112,7 +119,10 @@ namespace ChromaBoy.Hardware
             {
                 if (apuCycles % 16384 == 0 && ch2Len > 0)
                     ch2Len--;
-                if (ch2Vol != 0 && ch2Len == 0) ch2Vol = 0;
+                if (ch2Vol != 0 && ch2Len == 0)
+                {
+                    ch2Vol = 0;
+                }
             }
 
             // Set Sound Volume
@@ -143,21 +153,6 @@ namespace ChromaBoy.Hardware
                 parent.Memory.TriggerAudio2 = false;
                 if (ch2Len == 0) ch2Len = 64;
                 ch2Vol = (byte)((parent.Memory[0xFF17] & 0xF0) >> 4);
-            }
-
-            // Update Sound Length
-            if (parent.Memory.UpdateAudioLength1)
-            {
-                parent.Memory.UpdateAudioLength2 = false;
-                ch2Len = (byte)(64 - (parent.Memory[0xFF16] & 0x3F));
-            }
-            if ((parent.Memory.Get(0xFF19) & 0b1000000) != 0)
-            {
-                if (apuCycles % 16384 == 0 && ch2Len > 0)
-                {
-                    ch2Len--;
-                }
-                if (ch2Vol != 0 && ch2Len == 0) ch2Vol = 0;
             }
         }
 
