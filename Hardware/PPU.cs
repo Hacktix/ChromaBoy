@@ -61,6 +61,25 @@ namespace ChromaBoy.Hardware
 
         public void ProcessCycle()
         {
+            // Handle OAM DMA Transfer
+            if (parent.Memory.DMATransfer)
+            {
+                if (dmaCooldown > 0)
+                    dmaCooldown--;
+                else
+                {
+                    parent.Memory.Set(0xFE00 + DMACount, parent.Memory.Get(parent.Memory.DMAAddr + DMACount));
+                    DMACount++;
+                    if (DMACount > 0x9F)
+                    {
+                        DMACount = 0;
+                        parent.Memory.DMAAddr = 0;
+                        parent.Memory.DMATransfer = false;
+                    }
+                    else dmaCooldown = 3;
+                }
+            }
+
             // PPU Clock Paused
             if (TimeoutCycles > 0)
             {
@@ -84,25 +103,6 @@ namespace ChromaBoy.Hardware
                 parent.Memory.UpdatedSTAT = false;
             }
             else if(parent.Memory.UpdatedSTAT) parent.Memory.UpdatedSTAT = false;
-
-            // Handle OAM DMA Transfer
-            if (parent.Memory.DMATransfer)
-            {
-                if (dmaCooldown > 0)
-                    dmaCooldown--;
-                else
-                {
-                    parent.Memory.Set(0xFE00 + DMACount, parent.Memory.Get(parent.Memory.DMAAddr + DMACount));
-                    DMACount++;
-                    if (DMACount > 0x9F)
-                    {
-                        DMACount = 0;
-                        parent.Memory.DMAAddr = 0;
-                        parent.Memory.DMATransfer = false;
-                    }
-                    else dmaCooldown = 3;
-                }
-            }
 
             // Do calculations or whatever
             switch (Mode)
