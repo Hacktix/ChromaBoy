@@ -254,26 +254,29 @@ namespace ChromaBoy.Hardware
             DivRegister++;
             Memory.Set(0xFF04, (byte)((DivRegister & 0xFF00) >> 8));
 
-            int shiftCnt = (Memory[0xFF07] & 0b11) == 0 ? 6 : (Memory[0xFF07] & 0b11) == 1 ? 0 : (Memory[0xFF07] & 0b11) == 2 ? 2 : 4;
-            ushort dbmp = (ushort)(0b1000 << shiftCnt);
-
-            TimerAndResult = ((DivRegister & dbmp) & ((Memory[0xFF07] & 0b100) << (shiftCnt+1))) > 0;
-            if(TimerAndResult != LastTimerAndResult)
+            if((Memory[0xFF07] & 0b100) != 0)
             {
-                LastTimerAndResult = TimerAndResult;
-                if(!TimerAndResult)
-                {
-                    if (Memory[0xFF05] == 0xFF)
-                    {
-                        Memory[0xFF05] = 0;
-                        TimerReloadCooldown = 4;
-                        Memory[0xFF0F] |= 0b100;
-                    }
-                    else Memory[0xFF05]++;
-                }
-            }
+                int shiftCnt = (Memory[0xFF07] & 0b11) == 0 ? 6 : (Memory[0xFF07] & 0b11) == 1 ? 0 : (Memory[0xFF07] & 0b11) == 2 ? 2 : 4;
+                ushort dbmp = (ushort)(0b1000 << shiftCnt);
 
-            if (TimerReloadCooldown > -1 && --TimerReloadCooldown == -1) Memory[0xFF05] = Memory[0xFF06];
+                TimerAndResult = ((DivRegister & dbmp) & ((Memory[0xFF07] & 0b100) << (shiftCnt + 1))) > 0;
+                if (TimerAndResult != LastTimerAndResult)
+                {
+                    LastTimerAndResult = TimerAndResult;
+                    if (!TimerAndResult)
+                    {
+                        if (Memory[0xFF05] == 0xFF)
+                        {
+                            Memory[0xFF05] = 0;
+                            TimerReloadCooldown = 4;
+                            Memory[0xFF0F] |= 0b100;
+                        }
+                        else Memory[0xFF05]++;
+                    }
+                }
+
+                if (TimerReloadCooldown > -1 && --TimerReloadCooldown == -1) Memory[0xFF05] = Memory[0xFF06];
+            }
         }
 
         public void WriteRegister16(Register16 regpair, ushort value)
