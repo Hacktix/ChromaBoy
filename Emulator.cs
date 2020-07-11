@@ -40,8 +40,8 @@ namespace ChromaBoy
 
         public Emulator()
         {
-            Graphics.VSyncEnabled = false;
-            Window.GoWindowed((ushort)(SCREEN_WIDTH * SCALE_FACTOR), (ushort)(SCREEN_HEIGHT * SCALE_FACTOR));
+            Graphics.VerticalSyncMode = VerticalSyncMode.None;
+            Window.GoWindowed(new System.Drawing.Size(SCREEN_WIDTH * SCALE_FACTOR, SCREEN_HEIGHT * SCALE_FACTOR), true);
             Frame = new RenderTarget((ushort)SCREEN_WIDTH, (ushort)SCREEN_HEIGHT);
             Frame.FilteringMode = TextureFilteringMode.NearestNeighbor;
             AudioManager = Audio;
@@ -145,7 +145,7 @@ namespace ChromaBoy
                 foreach (double value in PerformanceBuffer) percent += value;
                 percent /= PerformanceBuffer.Count;
                 percent = ((int)(percent * 10000)) / 100.0;
-                Window.Properties.Title = "ChromaBoy (" + Window.FPS + " FPS) [" + percent + "%] : " + Gameboy.Cartridge.Title;
+                Window.Title = "ChromaBoy (" + Window.FPS + " FPS) [" + percent + "%] : " + Gameboy.Cartridge.Title;
             }
         }
 
