@@ -83,6 +83,7 @@ namespace ChromaBoy.Hardware
             // PPU Clock Paused
             if (TimeoutCycles > 0)
             {
+                PPUCycles++;
                 TimeoutCycles--;
                 return;
             }
