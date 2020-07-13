@@ -135,11 +135,7 @@ namespace ChromaBoy.Hardware
             switch(fetcherState)
             {
                 case 0: // Fetch tile number
-                    ushort baseTileAddr = 0x9800;
-                    if ((parent.Memory.Get(0xFF40) & 0b1000) != 0 && lx < (parent.Memory.Get(0xFF4B) - 7)) // LCDC Bit 3 set and fetching background pixels
-                        baseTileAddr = 0x9C00;
-                    else if((parent.Memory.Get(0xFF40) & 0b1000000) != 0 && lx >= (parent.Memory.Get(0xFF4B) - 7)) // LCDC Bit 6 set and fetching window pixels
-                        baseTileAddr = 0x9C00;
+                    ushort baseTileAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b1000) == 0 ? 0x9800 : 0x9C00);
                     tileNumber = parent.Memory.Get(baseTileAddr + fetchOffset++ + 32*(ly/8));
                     break;
                 case 2: // Fetch Tile Data Low
