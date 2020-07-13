@@ -8,18 +8,17 @@ namespace ChromaBoy.Software
     {
         private Gameboy parent;
 
-        public int X = 0;
-        public int Y = 0;
-        public byte TileNo = 0;
-
-        private byte attributes = 0;
+        public readonly int X = 0;
+        public readonly int Y = 0;
+        public readonly byte TileNo = 0;
+        public readonly byte Attributes = 0;
 
         public ObjectSprite(Gameboy parent, ushort addr)
         {
-            Y = parent.Memory.Get(addr) - 16;
-            X = parent.Memory.Get(addr + 1) - 8;
+            Y = parent.Memory.Get(addr);
+            X = parent.Memory.Get(addr + 1);
             TileNo = parent.Memory.Get(addr + 2);
-            attributes = parent.Memory.Get(addr + 3);
+            Attributes = parent.Memory.Get(addr + 3);
 
             this.parent = parent;
         }
@@ -27,7 +26,7 @@ namespace ChromaBoy.Software
         public byte GetPixel(byte x, byte y)
         {
             if (HasAttribute(SpriteAttribute.YFlip))
-                y = (byte)(parent.PPU.LargeSprites ? 15 - y : 7 - y);
+                y = (byte)((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 - y : 7 - y);
 
             if (HasAttribute(SpriteAttribute.XFlip))
                 x = (byte)(7 - x);
@@ -35,7 +34,7 @@ namespace ChromaBoy.Software
             int lt = TileNo & 0xFE;
             int ut = TileNo | 1;
 
-            ushort tileBaseAddr = (ushort)(0x8000 | ((parent.PPU.LargeSprites ? y > 7 ? ut : lt : TileNo) << 4) + 2 * (y % 8));
+            ushort tileBaseAddr = (ushort)(0x8000 | (((parent.Memory.Get(0xFF40) & 0b100) != 0 ? y > 7 ? ut : lt : TileNo) << 4) + 2 * (y % 8));
             ushort tileData = (ushort)((parent.Memory.Get(tileBaseAddr) << 8) + (parent.Memory.Get(tileBaseAddr + 1)));
             ushort bmp = (ushort)(0b1000000010000000 >> (x % 8));
 
@@ -49,7 +48,7 @@ namespace ChromaBoy.Software
 
         public bool HasAttribute(SpriteAttribute attr)
         {
-            return (attributes & (byte)attr) != 0;
+            return (Attributes & (byte)attr) != 0;
         }
     }
 }

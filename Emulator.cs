@@ -162,7 +162,7 @@ namespace ChromaBoy
                         {
                             for (int y = 0; y < SCREEN_HEIGHT; y++)
                             {
-                                context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCDBuffer[x, y]]);
+                                context.Rectangle(ShapeMode.Fill, new Vector2(x, y), 1f, 1f, ShadeColorMap[Gameboy.PPU.LCDBuf2[x, y]]);
                             }
                         }
                     });
