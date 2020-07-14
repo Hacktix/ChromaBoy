@@ -110,15 +110,16 @@ namespace ChromaBoy.Hardware
         private void ProcessDrawingCycle()
         {
             FetchBackgroundPixels(); // Tick background pixel fetcher
-            // TODO: Tick sprite fetcher
 
-            if(pixelFifo.Count > 0 && !shiftingPaused)
+            if (pixelFifo.Count > 0 && !shiftingPaused)
             {
-                if(scrollShifted != (parent.Memory.Get(0xFF43) % 8))
+                if (scrollShifted != (parent.Memory.Get(0xFF43) % 8))
                 {
                     scrollShifted++;
                     pixelFifo.Dequeue();
-                } else {
+                }
+                else
+                {
                     FifoPixel pixel = pixelFifo.Dequeue();
                     byte color = (byte)((parent.Memory.Get(0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
                     LCDBuf1[lx++, ly] = (byte)(color + 1);
@@ -134,8 +135,6 @@ namespace ChromaBoy.Hardware
                         scrollShifted = 0;
                     }
                 }
-
-                
             }
         }
 
@@ -169,7 +168,7 @@ namespace ChromaBoy.Hardware
                         for(ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
                         {
                             ushort tmp = (ushort)(tileData & bmp);
-                            pixelFifo.Enqueue(new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), false));
+                            pixelFifo.Enqueue((parent.Memory.Get(0xFF40) & 1) == 0 ? new FifoPixel(0, false) : new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), false));
                             if (bit == 0) break;
                         }
                         fetcherState = 0;
