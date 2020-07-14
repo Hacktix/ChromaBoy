@@ -43,6 +43,12 @@ namespace ChromaBoy.Hardware
         // # STAT Interrupts
         private bool lastStat = false;
 
+        // # DMA Transfer
+        public byte CurrentByte = 0;
+        private byte dmaCooldown = 0;
+        private bool dmaInit = false;
+        private ushort dmaOffset = 0;
+
         public PPU(Gameboy parent)
         {
             this.parent = parent;
@@ -168,7 +174,33 @@ namespace ChromaBoy.Hardware
         #region OAM DMA
         private void ProcessDMA()
         {
-            // TODO: Implement OAM DMA
+            if(parent.Memory.DMATransfer)
+            {
+                if(!dmaInit)
+                {
+                    // Initialize DMA in first cycle
+                    dmaOffset = 0;
+                    dmaInit = true;
+                } else {
+                    // Handle cooldown cycles
+                    if(dmaCooldown > 0)
+                    {
+                        dmaCooldown--;
+                        return;
+                    }
+
+                    // Copy memory
+                    parent.Memory.Set(0xFE00 + dmaOffset, parent.Memory.Get(parent.Memory.DMAAddr + dmaOffset));
+                    dmaOffset++;
+                    dmaCooldown = 3;
+                    
+                    if(dmaOffset == 0xA0) // If end of DMA copy block has been reached
+                    {
+                        dmaInit = false;
+                        parent.Memory.DMATransfer = false;
+                    }
+                }
+            }
         }
         #endregion
 
