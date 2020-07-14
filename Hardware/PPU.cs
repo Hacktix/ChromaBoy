@@ -27,6 +27,7 @@ namespace ChromaBoy.Hardware
         private byte wly = 0;
 
         // - Pixel Fetcher
+        private bool drawingWindow = false;
         private byte fetcherState = 0;
         private byte fetchOffset = 0;
         private byte tileNumber = 0;
@@ -70,6 +71,11 @@ namespace ChromaBoy.Hardware
             if(++scanlineCycles == 457) // If end of scanline has been reached
             {
                 ++ly;
+                if(drawingWindow)
+                {
+                    ++wly;
+                    drawingWindow = false;
+                }
                 parent.Memory.Set(0xFF44, ly);
                 scanlineCycles = 1;
                 if (ly < 144) // Enter new scanline to draw
@@ -124,6 +130,14 @@ namespace ChromaBoy.Hardware
                     byte color = (byte)((parent.Memory.Get(0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
                     LCDBuf1[lx++, ly] = (byte)(color + 1);
 
+                    if((parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && (lx + 7 == parent.Memory.Get(0xFF4B) || parent.Memory.Get(0xFF4B) < 7))
+                    {
+                        pixelFifo.Clear();
+                        fetcherState = 0;
+                        fetchOffset = 0;
+                        drawingWindow = true;
+                    }
+
                     if (lx == 160) // Clear FIFO, reset fetcher and enter HBlank if end of screen reached
                     {
                         ChangeMode(0);
@@ -149,17 +163,22 @@ namespace ChromaBoy.Hardware
             switch(fetcherState)
             {
                 case 0: // Fetch tile number
-                    ushort baseTileAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b1000) == 0 ? 0x9800 : 0x9C00);
-                    tileNumber = parent.Memory.Get(baseTileAddr + ((fetchOffset++ + parent.Memory.Get(0xFF43)/8) % 32) + 32 * (((ly + parent.Memory.Get(0xFF42)) / 8) % 32));
+                    ushort baseTileAddr = 0x9800;
+                    if ((parent.Memory.Get(0xFF40) & 0b1000) != 0 && !drawingWindow)
+                        baseTileAddr = 0x9C00;
+                    else if ((parent.Memory.Get(0xFF40) & 0b1000000) != 0 && drawingWindow)
+                        baseTileAddr = 0x9C00;
+                    int addressOffset = drawingWindow ? (fetchOffset++ + 32 * (wly / 8)) : (((fetchOffset++ + parent.Memory.Get(0xFF43) / 8) % 32) + 32 * (((ly + parent.Memory.Get(0xFF42)) / 8) % 32));
+                    tileNumber = parent.Memory.Get(baseTileAddr + addressOffset);
                     break;
                 case 2: // Fetch Tile Data Low
                     ushort lowDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
-                    lowDataAddr = (ushort)(lowDataAddr + (lowDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * ((ly + parent.Memory.Get(0xFF42)) % 8));
+                    lowDataAddr = (ushort)(lowDataAddr + (lowDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (drawingWindow ? (wly % 8) : ((ly + parent.Memory.Get(0xFF42)) % 8)));
                     tileData = parent.Memory.Get(lowDataAddr);
                     break;
                 case 4: // Fetch Tile Data High
                     ushort highDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
-                    highDataAddr = (ushort)(highDataAddr + (highDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * ((ly + parent.Memory.Get(0xFF42)) % 8) + 1);
+                    highDataAddr = (ushort)(highDataAddr + (highDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (drawingWindow ? (wly % 8) : ((ly + parent.Memory.Get(0xFF42)) % 8)) + 1);
                     tileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Attempt push
