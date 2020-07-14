@@ -151,16 +151,16 @@ namespace ChromaBoy.Hardware
             {
                 case 0: // Fetch tile number
                     ushort baseTileAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b1000) == 0 ? 0x9800 : 0x9C00);
-                    tileNumber = parent.Memory.Get(baseTileAddr + (fetchOffset++ + ((parent.Memory.Get(0xFF43) / 8) % 32)) + 32*((ly/8 + parent.Memory.Get(0xFF42)/8) % 32));
+                    tileNumber = parent.Memory.Get(baseTileAddr + ((fetchOffset++ + parent.Memory.Get(0xFF43)/8) % 32) + 32 * (((ly + parent.Memory.Get(0xFF42)) / 8) % 32));
                     break;
                 case 2: // Fetch Tile Data Low
                     ushort lowDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
-                    lowDataAddr = (ushort)(lowDataAddr + (lowDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (ly % 8));
+                    lowDataAddr = (ushort)(lowDataAddr + (lowDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * ((ly + parent.Memory.Get(0xFF42)) % 8));
                     tileData = parent.Memory.Get(lowDataAddr);
                     break;
                 case 4: // Fetch Tile Data High
                     ushort highDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
-                    highDataAddr = (ushort)(highDataAddr + (highDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (ly % 8) + 1);
+                    highDataAddr = (ushort)(highDataAddr + (highDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * ((ly + parent.Memory.Get(0xFF42)) % 8) + 1);
                     tileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Attempt push
