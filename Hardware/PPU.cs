@@ -14,6 +14,7 @@ namespace ChromaBoy.Hardware
 
         // # Mode Variables
         private byte mode = 2;
+        private bool reset = false;
 
         // * OAM Search
         private byte oamScanOffset = 0;
@@ -60,6 +61,12 @@ namespace ChromaBoy.Hardware
         {
             // Handle OAM DMA
             ProcessDMA();
+
+            if((parent.Memory.Get(0xFF40) & 0b10000000) == 0)
+            {
+                if (!reset) Reset();
+                return;
+            }
 
             // Handle operations based on mode
             switch(mode)
@@ -272,6 +279,24 @@ namespace ChromaBoy.Hardware
                 lastStat = stat;
                 if (stat) parent.Memory[0xFF0F] |= 2;
             }
+        }
+
+        private void Reset()
+        {
+            ly = 0;
+            wly = 0;
+            drawingWindow = false;
+            lx = 0;
+            pixelFifo.Clear();
+            oamBuf.Clear();
+            fetcherState = 0;
+            fetchOffset = 0;
+            scrollShifted = 0;
+
+            LCDBuf2 = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
+            HasUpdated = true;
+
+            reset = true;
         }
         #endregion
     }
