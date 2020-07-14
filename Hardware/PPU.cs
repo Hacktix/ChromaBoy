@@ -23,6 +23,7 @@ namespace ChromaBoy.Hardware
         // * Drawing
         private byte ly = 0;
         private byte lx = 0;
+        private byte scrollShifted = 0;
         private byte wly = 0;
 
         // - Pixel Fetcher
@@ -113,20 +114,28 @@ namespace ChromaBoy.Hardware
 
             if(pixelFifo.Count > 0 && !shiftingPaused)
             {
-                // Console.WriteLine("Shifting out pixel (" + pixelFifo.Count + " left)");
-                FifoPixel pixel = pixelFifo.Dequeue();
-                byte color = (byte)((parent.Memory.Get(0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
-                LCDBuf1[lx++, ly] = (byte)(color + 1);
-
-                if(lx == 160) // Clear FIFO, reset fetcher and enter HBlank if end of screen reached
+                if(scrollShifted != (parent.Memory.Get(0xFF43) % 8))
                 {
-                    ChangeMode(0);
-                    lx = 0;
-                    pixelFifo.Clear();
-                    oamBuf.Clear();
-                    fetcherState = 0;
-                    fetchOffset = 0;
+                    scrollShifted++;
+                    pixelFifo.Dequeue();
+                } else {
+                    FifoPixel pixel = pixelFifo.Dequeue();
+                    byte color = (byte)((parent.Memory.Get(0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
+                    LCDBuf1[lx++, ly] = (byte)(color + 1);
+
+                    if (lx == 160) // Clear FIFO, reset fetcher and enter HBlank if end of screen reached
+                    {
+                        ChangeMode(0);
+                        lx = 0;
+                        pixelFifo.Clear();
+                        oamBuf.Clear();
+                        fetcherState = 0;
+                        fetchOffset = 0;
+                        scrollShifted = 0;
+                    }
                 }
+
+                
             }
         }
 
@@ -142,7 +151,7 @@ namespace ChromaBoy.Hardware
             {
                 case 0: // Fetch tile number
                     ushort baseTileAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b1000) == 0 ? 0x9800 : 0x9C00);
-                    tileNumber = parent.Memory.Get(baseTileAddr + fetchOffset++ + 32*(ly/8));
+                    tileNumber = parent.Memory.Get(baseTileAddr + (fetchOffset++ + ((parent.Memory.Get(0xFF43) / 8) % 32)) + 32*((ly/8 + parent.Memory.Get(0xFF42)/8) % 32));
                     break;
                 case 2: // Fetch Tile Data Low
                     ushort lowDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
