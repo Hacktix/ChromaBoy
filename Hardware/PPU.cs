@@ -28,6 +28,7 @@ namespace ChromaBoy.Hardware
         private byte wly = 0;
 
         // - Pixel Fetcher
+        private bool fetchedFirstTile = false;
         private bool drawingWindow = false;
         private bool fetchingSprite = false;
         private byte fetcherState = 0;
@@ -132,7 +133,7 @@ namespace ChromaBoy.Hardware
 
             FetchBackgroundPixels(); // Tick background pixel fetcher
 
-            if(!fetchingSprite)
+            if(!fetchingSprite && fetchedFirstTile)
                 CheckForSprite();
 
             if (fetchingSprite)
@@ -170,6 +171,7 @@ namespace ChromaBoy.Hardware
                         fetchOffset = 0;
                         spriteFetcherState = 0;
                         scrollShifted = 0;
+                        fetchedFirstTile = false;
                     }
                 }
             }
@@ -309,6 +311,11 @@ namespace ChromaBoy.Hardware
                     tileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Attempt push
+                    if(!fetchedFirstTile)
+                    {
+                        fetchedFirstTile = true;
+                        fetcherState = 0;
+                    }
                     if (pixelFifo.Count <= 8)
                     {
                         for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
@@ -366,8 +373,6 @@ namespace ChromaBoy.Hardware
         {
             mode = newMode;
             parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111000) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000) | mode));
-
-            // Console.WriteLine("Switched to mode " + newMode + " at " + scanlineCycles + " | LY: " + ly);
 
             if (mode == 1) // VBlank Interrupt
                 parent.Memory.Set(0xFF0F, (byte)(parent.Memory.Get(0xFF0F) | 1));
