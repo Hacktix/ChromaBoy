@@ -42,9 +42,6 @@ namespace ChromaBoy.Hardware
         private byte spriteTileNumber = 0;
         private ushort spriteTileData = 0;
 
-        // - LCD Shifter
-        private bool shiftingPaused = false;
-
         // # LCD Buffers
         public byte[,] LCDBuf1 = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
         public byte[,] LCDBuf2 = new byte[Emulator.SCREEN_WIDTH, Emulator.SCREEN_HEIGHT];
@@ -192,14 +189,14 @@ namespace ChromaBoy.Hardware
                     if ((parent.Memory.Get(0xFF40) & 0b100) == 0)
                         spriteTileNumber = fetchedSprite.TileNo;
                     else
-                        spriteTileNumber = (byte)((ly - fetchedSprite.Y + 16) < 8 ? fetchedSprite.TileNo & 0xFE : fetchedSprite.TileNo & 0xFE | 1);
+                        spriteTileNumber = (byte)((ly - fetchedSprite.Y - 16) < 8 ? (fetchedSprite.TileNo & 0xFE) : (fetchedSprite.TileNo & 0xFE | 1));
                     break;
                 case 2: // Fetch Tile Data Low
                     ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))));
                     spriteTileData = parent.Memory.Get(lowDataAddr);
                     break;
                 case 4: // Fetch Tile Data High
-                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (ly - (fetchedSprite.Y - 16)) + 1);
+                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))) + 1);
                     spriteTileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Merge sprite pixels with FIFO
@@ -263,7 +260,7 @@ namespace ChromaBoy.Hardware
                 return;
             for(int i = 0; i < oamBuf.Count; i++)
             {
-                if(oamBuf[i].X - 8 == lx)
+                if(oamBuf[i].X - 8 == lx || (lx == 0 && oamBuf[i].X <= 8))
                 {
                     fetchedSprite = oamBuf[i];
                     fetchingSprite = true;
