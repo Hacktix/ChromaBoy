@@ -189,7 +189,7 @@ namespace ChromaBoy.Hardware
                     spriteTileNumber = fetchedSprite.TileNo;
                     break;
                 case 2: // Fetch Tile Data Low
-                    ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (ly - (fetchedSprite.Y - 16)));
+                    ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))));
                     spriteTileData = parent.Memory.Get(lowDataAddr);
                     break;
                 case 4: // Fetch Tile Data High
@@ -197,17 +197,34 @@ namespace ChromaBoy.Hardware
                     spriteTileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Merge sprite pixels with FIFO
-                    for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
+                    if(!fetchedSprite.HasAttribute(SpriteAttribute.XFlip))
                     {
-                        ushort tmp = (ushort)(spriteTileData & bmp);
-                        FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
-                        FifoPixel backgroundPixel = pixelFifo.Dequeue();
-                        if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
-                            pixelFifo.Enqueue(spritePixel);
-                        else
-                            pixelFifo.Enqueue(backgroundPixel);
-                        if (bit == 0) break;
+                        for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
+                        {
+                            ushort tmp = (ushort)(spriteTileData & bmp);
+                            FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
+                            FifoPixel backgroundPixel = pixelFifo.Dequeue();
+                            if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
+                                pixelFifo.Enqueue(spritePixel);
+                            else
+                                pixelFifo.Enqueue(backgroundPixel);
+                            if (bit == 0) break;
+                        }
+                    } else
+                    {
+                        for (ushort bmp = 0b0000000100000001, bit = 0; ; bmp <<= 1, bit++)
+                        {
+                            ushort tmp = (ushort)(spriteTileData & bmp);
+                            FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
+                            FifoPixel backgroundPixel = pixelFifo.Dequeue();
+                            if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
+                                pixelFifo.Enqueue(spritePixel);
+                            else
+                                pixelFifo.Enqueue(backgroundPixel);
+                            if (bit == 7) break;
+                        }
                     }
+                    
                     for (int i = 0; i < pixelFifo.Count - 8; i++)
                         pixelFifo.Enqueue(pixelFifo.Dequeue());
                     CheckForSprite();
