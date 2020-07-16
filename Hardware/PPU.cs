@@ -210,10 +210,20 @@ namespace ChromaBoy.Hardware
                             ushort tmp = (ushort)(spriteTileData & bmp);
                             FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
                             FifoPixel backgroundPixel = pixelFifo.Dequeue();
-                            if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
-                                pixelFifo.Enqueue(spritePixel);
+                            if (fetchedSprite.HasAttribute(SpriteAttribute.Priority))
+                            {
+                                if (!backgroundPixel.IsSpritePixel && backgroundPixel.PixelData == 0 && spritePixel.PixelData != 0)
+                                    pixelFifo.Enqueue(spritePixel);
+                                else
+                                    pixelFifo.Enqueue(backgroundPixel);
+                            }
                             else
-                                pixelFifo.Enqueue(backgroundPixel);
+                            {
+                                if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
+                                    pixelFifo.Enqueue(spritePixel);
+                                else
+                                    pixelFifo.Enqueue(backgroundPixel);
+                            }
                             if (bit == 0) break;
                         }
                     } else
