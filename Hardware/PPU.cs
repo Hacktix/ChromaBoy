@@ -378,6 +378,13 @@ namespace ChromaBoy.Hardware
                 parent.Memory.Set(0xFF0F, (byte)(parent.Memory.Get(0xFF0F) | 1));
 
             UpdateStatInterrupts();
+
+            switch(mode)
+            {
+                case 2: parent.Memory.LockOAM = true; parent.Memory.LockVRAM = false; break;
+                case 3: parent.Memory.LockOAM = true; parent.Memory.LockVRAM = true; break;
+                default: parent.Memory.LockVRAM = false; parent.Memory.LockOAM = false; break;
+            }
         }
 
         private void StartNewFrame()
