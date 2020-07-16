@@ -91,6 +91,7 @@ namespace ChromaBoy.Hardware
                     drawingWindow = false;
                 }
                 parent.Memory.Set(0xFF44, ly);
+                parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)));
                 scanlineCycles = 1;
                 if (ly < 144) // Enter new scanline to draw
                     ChangeMode(2);
@@ -129,12 +130,10 @@ namespace ChromaBoy.Hardware
         #region Drawing
         private void ProcessDrawingCycle()
         {
+            FetchBackgroundPixels(); // Tick background pixel fetcher
+
             if(!fetchingSprite)
-            {
-                FetchBackgroundPixels(); // Tick background pixel fetcher
-                if(fetcherState == 0)
-                    CheckForSprite();
-            }
+                CheckForSprite();
 
             if (fetchingSprite)
                 FetchSpritePixels();
@@ -169,6 +168,7 @@ namespace ChromaBoy.Hardware
                         oamBuf.Clear();
                         fetcherState = 0;
                         fetchOffset = 0;
+                        spriteFetcherState = 0;
                         scrollShifted = 0;
                     }
                 }
@@ -177,6 +177,9 @@ namespace ChromaBoy.Hardware
 
         private void FetchSpritePixels()
         {
+            if (fetcherState != 0)
+                return;
+
             if (spriteFetcherState % 2 != 0) // Clock fetcher at CPU Clock / 2
             {
                 spriteFetcherState++;
@@ -186,7 +189,10 @@ namespace ChromaBoy.Hardware
             switch(spriteFetcherState)
             {
                 case 0: // Fetch tile number
-                    spriteTileNumber = fetchedSprite.TileNo;
+                    if ((parent.Memory.Get(0xFF40) & 0b100) == 0)
+                        spriteTileNumber = fetchedSprite.TileNo;
+                    else
+                        spriteTileNumber = (byte)((ly - fetchedSprite.Y + 16) < 8 ? fetchedSprite.TileNo & 0xFE : fetchedSprite.TileNo & 0xFE | 1);
                     break;
                 case 2: // Fetch Tile Data Low
                     ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))));
@@ -217,10 +223,18 @@ namespace ChromaBoy.Hardware
                             ushort tmp = (ushort)(spriteTileData & bmp);
                             FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
                             FifoPixel backgroundPixel = pixelFifo.Dequeue();
-                            if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
-                                pixelFifo.Enqueue(spritePixel);
-                            else
-                                pixelFifo.Enqueue(backgroundPixel);
+                            if(fetchedSprite.HasAttribute(SpriteAttribute.Priority))
+                            {
+                                if (!backgroundPixel.IsSpritePixel && backgroundPixel.PixelData == 0 && spritePixel.PixelData != 0)
+                                    pixelFifo.Enqueue(spritePixel);
+                                else
+                                    pixelFifo.Enqueue(backgroundPixel);
+                            } else {
+                                if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
+                                    pixelFifo.Enqueue(spritePixel);
+                                else
+                                    pixelFifo.Enqueue(backgroundPixel);
+                            }
                             if (bit == 7) break;
                         }
                     }
@@ -235,6 +249,8 @@ namespace ChromaBoy.Hardware
 
         private void CheckForSprite()
         {
+            if((parent.Memory.Get(0xFF40) & 0b10) == 0)
+                return;
             for(int i = 0; i < oamBuf.Count; i++)
             {
                 if(oamBuf[i].X - 8 == lx)
@@ -242,7 +258,6 @@ namespace ChromaBoy.Hardware
                     fetchedSprite = oamBuf[i];
                     fetchingSprite = true;
                     spriteFetcherState = 0;
-                    fetcherState = 0;
                     oamBuf.RemoveAt(i);
                     return;
                 }
@@ -253,6 +268,9 @@ namespace ChromaBoy.Hardware
 
         private void FetchBackgroundPixels()
         {
+            if (fetchingSprite && fetcherState == 0)
+                return;
+
             if(fetcherState % 2 != 0) // Clock fetcher at CPU Clock / 2
             {
                 fetcherState++;
@@ -281,16 +299,19 @@ namespace ChromaBoy.Hardware
                     tileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Attempt push
-                    if(pixelFifo.Count == 0)
+                    if (pixelFifo.Count <= 8)
                     {
-                        for(ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
+                        for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
                         {
                             ushort tmp = (ushort)(tileData & bmp);
                             pixelFifo.Enqueue((parent.Memory.Get(0xFF40) & 1) == 0 ? new FifoPixel(0, false) : new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), false));
                             if (bit == 0) break;
                         }
                         fetcherState = 0;
-                    }
+                    } else if(fetchingSprite)
+                        fetchOffset--;
+                    if(fetchingSprite)
+                        fetcherState = 0;
                     return;
             }
             fetcherState++;
@@ -348,6 +369,7 @@ namespace ChromaBoy.Hardware
         {
             ly = 0;
             parent.Memory.Set(0xFF44, ly);
+            parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)));
             wly = 0;
             ChangeMode(2);
 
@@ -376,6 +398,8 @@ namespace ChromaBoy.Hardware
         private void Reset()
         {
             ly = 0;
+            parent.Memory.Set(0xFF44, ly);
+            parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)));
             wly = 0;
             drawingWindow = false;
             lx = 0;
