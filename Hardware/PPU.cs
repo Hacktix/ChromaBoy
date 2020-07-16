@@ -149,7 +149,8 @@ namespace ChromaBoy.Hardware
                 else
                 {
                     FifoPixel pixel = pixelFifo.Dequeue();
-                    byte color = (byte)((parent.Memory.Get(0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
+                    byte color = (byte)((parent.Memory.Get(pixel.IsSpritePixel ? (0xFF48 + pixel.Palette) : 0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
+
                     LCDBuf1[lx++, ly] = (byte)(color + 1);
 
                     if((parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && (lx + 7 == parent.Memory.Get(0xFF4B) || parent.Memory.Get(0xFF4B) < 7))
@@ -192,14 +193,14 @@ namespace ChromaBoy.Hardware
                     spriteTileData = parent.Memory.Get(lowDataAddr);
                     break;
                 case 4: // Fetch Tile Data High
-                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (ly - (fetchedSprite.Y - 16) + 1));
+                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (ly - (fetchedSprite.Y - 16)) + 1);
                     spriteTileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
                     break;
                 case 6: // Merge sprite pixels with FIFO
                     for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
                     {
                         ushort tmp = (ushort)(spriteTileData & bmp);
-                        FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true);
+                        FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
                         FifoPixel backgroundPixel = pixelFifo.Dequeue();
                         if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
                             pixelFifo.Enqueue(spritePixel);
