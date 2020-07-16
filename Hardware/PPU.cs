@@ -29,11 +29,18 @@ namespace ChromaBoy.Hardware
 
         // - Pixel Fetcher
         private bool drawingWindow = false;
+        private bool fetchingSprite = false;
         private byte fetcherState = 0;
         private byte fetchOffset = 0;
         private byte tileNumber = 0;
         private ushort tileData = 0;
         private Queue<FifoPixel> pixelFifo = new Queue<FifoPixel>();
+
+        // - Sprite Fetcher
+        private ObjectSprite fetchedSprite = null;
+        private byte spriteFetcherState = 0;
+        private byte spriteTileNumber = 0;
+        private ushort spriteTileData = 0;
 
         // - LCD Shifter
         private bool shiftingPaused = false;
@@ -122,9 +129,17 @@ namespace ChromaBoy.Hardware
         #region Drawing
         private void ProcessDrawingCycle()
         {
-            FetchBackgroundPixels(); // Tick background pixel fetcher
+            if(!fetchingSprite)
+            {
+                FetchBackgroundPixels(); // Tick background pixel fetcher
+                if(fetcherState == 0)
+                    CheckForSprite();
+            }
 
-            if (pixelFifo.Count > 0 && !shiftingPaused)
+            if (fetchingSprite)
+                FetchSpritePixels();
+
+            if (pixelFifo.Count > 0 && !fetchingSprite)
             {
                 if (scrollShifted != (parent.Memory.Get(0xFF43) % 8))
                 {
@@ -157,6 +172,65 @@ namespace ChromaBoy.Hardware
                     }
                 }
             }
+        }
+
+        private void FetchSpritePixels()
+        {
+            if (spriteFetcherState % 2 != 0) // Clock fetcher at CPU Clock / 2
+            {
+                spriteFetcherState++;
+                return;
+            }
+
+            switch(spriteFetcherState)
+            {
+                case 0: // Fetch tile number
+                    spriteTileNumber = fetchedSprite.TileNo;
+                    break;
+                case 2: // Fetch Tile Data Low
+                    ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (ly - (fetchedSprite.Y - 16)));
+                    spriteTileData = parent.Memory.Get(lowDataAddr);
+                    break;
+                case 4: // Fetch Tile Data High
+                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (ly - (fetchedSprite.Y - 16) + 1));
+                    spriteTileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
+                    break;
+                case 6: // Merge sprite pixels with FIFO
+                    for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
+                    {
+                        ushort tmp = (ushort)(spriteTileData & bmp);
+                        FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true);
+                        FifoPixel backgroundPixel = pixelFifo.Dequeue();
+                        if (!backgroundPixel.IsSpritePixel && spritePixel.PixelData != 0)
+                            pixelFifo.Enqueue(spritePixel);
+                        else
+                            pixelFifo.Enqueue(backgroundPixel);
+                        if (bit == 0) break;
+                    }
+                    for (int i = 0; i < pixelFifo.Count - 8; i++)
+                        pixelFifo.Enqueue(pixelFifo.Dequeue());
+                    CheckForSprite();
+                    return;
+            }
+            spriteFetcherState++;
+        }
+
+        private void CheckForSprite()
+        {
+            for(int i = 0; i < oamBuf.Count; i++)
+            {
+                if(oamBuf[i].X - 8 == lx)
+                {
+                    fetchedSprite = oamBuf[i];
+                    fetchingSprite = true;
+                    spriteFetcherState = 0;
+                    fetcherState = 0;
+                    oamBuf.RemoveAt(i);
+                    return;
+                }
+            }
+            fetchedSprite = null;
+            fetchingSprite = false;
         }
 
         private void FetchBackgroundPixels()
