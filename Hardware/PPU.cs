@@ -127,6 +127,9 @@ namespace ChromaBoy.Hardware
         #region Drawing
         private void ProcessDrawingCycle()
         {
+            if (lx == 0 && !drawingWindow && (parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && parent.Memory.Get(0xFF4B) <= 7)
+                drawingWindow = true;
+
             FetchBackgroundPixels(); // Tick background pixel fetcher
 
             if(!fetchingSprite)
@@ -137,7 +140,7 @@ namespace ChromaBoy.Hardware
 
             if (pixelFifo.Count > 0 && !fetchingSprite)
             {
-                if (scrollShifted != (parent.Memory.Get(0xFF43) % 8))
+                if (scrollShifted != (parent.Memory.Get(0xFF43) % 8) && !drawingWindow)
                 {
                     scrollShifted++;
                     pixelFifo.Dequeue();
@@ -149,7 +152,7 @@ namespace ChromaBoy.Hardware
 
                     LCDBuf1[lx++, ly] = (byte)(color + 1);
 
-                    if((parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && (lx + 7 == parent.Memory.Get(0xFF4B) || parent.Memory.Get(0xFF4B) < 7))
+                    if(!drawingWindow && (parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && (lx + 7 == parent.Memory.Get(0xFF4B) || parent.Memory.Get(0xFF4B) < 7))
                     {
                         pixelFifo.Clear();
                         fetcherState = 0;
@@ -230,7 +233,7 @@ namespace ChromaBoy.Hardware
                             ushort tmp = (ushort)(spriteTileData & bmp);
                             FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
                             FifoPixel backgroundPixel = pixelFifo.Dequeue();
-                            if(fetchedSprite.HasAttribute(SpriteAttribute.Priority))
+                            if (fetchedSprite.HasAttribute(SpriteAttribute.Priority))
                             {
                                 if (!backgroundPixel.IsSpritePixel && backgroundPixel.PixelData == 0 && spritePixel.PixelData != 0)
                                     pixelFifo.Enqueue(spritePixel);
@@ -260,7 +263,7 @@ namespace ChromaBoy.Hardware
                 return;
             for(int i = 0; i < oamBuf.Count; i++)
             {
-                if(oamBuf[i].X - 8 == lx || (lx == 0 && oamBuf[i].X <= 8))
+                if(oamBuf[i].X - 8 <= lx)
                 {
                     fetchedSprite = oamBuf[i];
                     fetchingSprite = true;
