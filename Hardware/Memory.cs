@@ -30,7 +30,7 @@ namespace ChromaBoy.Hardware
             this.BOOTROM = bootrom;
             this.parent = parent;
 
-            RAM[0xFF00] = 0b11000000;
+            RAM[0xFF00] = 0xFF;
         }
 
         public bool DMATransfer = false;
@@ -66,8 +66,8 @@ namespace ChromaBoy.Hardware
                 // Inputs
                 if (i == 0xFF00)
                 {
-                    if ((RAM[0xFF00] & 0b10000) == 0) return (byte)(RAM[0xFF00] | (Emulator.InputBits & 0x0F));
-                    else if ((RAM[0xFF00] & 0b100000) == 0) return (byte)(RAM[0xFF00] | ((Emulator.InputBits & 0xF0) >> 4));
+                    if ((RAM[0xFF00] & 0b10000) == 0) return (byte)((RAM[0xFF00] & 0xF0) | (Emulator.InputBits & 0x0F));
+                    else if ((RAM[0xFF00] & 0b100000) == 0) return (byte)((RAM[0xFF00] & 0xF0) | ((Emulator.InputBits & 0xF0) >> 4));
                 }
 
                 switch(i)
