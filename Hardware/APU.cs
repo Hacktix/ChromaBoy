@@ -37,7 +37,7 @@ namespace ChromaBoy.Hardware
         private void TickChannel1()
         {
             // Volume Envelope
-            byte nr12 = parent.Memory[0xFF12];
+            byte nr12 = parent.Memory.Get(0xFF12);
             if ((apuCycles % 65536) == 0 && (nr12 & 0b111) != 0)
             {
                 parent.Memory.Set(0xFF12, (byte)(nr12-1));
@@ -51,7 +51,7 @@ namespace ChromaBoy.Hardware
             if (parent.Memory.UpdateAudioLength1)
             {
                 parent.Memory.UpdateAudioLength1 = false;
-                ch1Len = (byte)(64 - (parent.Memory[0xFF11] & 0x3F));
+                ch1Len = (byte)(64 - (parent.Memory.Get(0xFF11) & 0x3F));
             }
             if ((parent.Memory.Get(0xFF14) & 0b1000000) != 0)
             {
@@ -76,7 +76,7 @@ namespace ChromaBoy.Hardware
 
             // Set Duty
             ch1.Duty = 0.125f;
-            switch((parent.Memory[0xFF11] & 0b11000000) >> 6)
+            switch((parent.Memory.Get(0xFF11) & 0b11000000) >> 6)
             {
                 case 0b01: ch1.Duty = 0.25f; break;
                 case 0b10: ch1.Duty = 0.5f; break;
@@ -84,7 +84,7 @@ namespace ChromaBoy.Hardware
             }
 
             // Set Frequency
-            ushort nr13 = (ushort)(parent.Memory[0xFF13] | ((parent.Memory[0xFF14] & 0b111) << 8));
+            ushort nr13 = (ushort)(parent.Memory.Get(0xFF13) | ((parent.Memory.Get(0xFF14) & 0b111) << 8));
             ch1.Frequency = (float)(131072.0 / (2048 - nr13)) * 2.0f;
 
             // Handle Triggers
@@ -92,14 +92,14 @@ namespace ChromaBoy.Hardware
             {
                 parent.Memory.TriggerAudio1 = false;
                 if (ch1Len == 0) ch1Len = 64;
-                ch1Vol = (byte)((parent.Memory[0xFF12] & 0xF0) >> 4);
+                ch1Vol = (byte)((parent.Memory.Get(0xFF12) & 0xF0) >> 4);
             }
         }
 
         private void TickChannel2()
         {
             // Volume Envelope
-            byte nr22 = parent.Memory[0xFF17];
+            byte nr22 = parent.Memory.Get(0xFF17);
             if ((apuCycles % 65536) == 0 && (nr22 & 0b111) != 0)
             {
                 parent.Memory.Set(0xFF17, (byte)(nr22 - 1));
@@ -113,7 +113,7 @@ namespace ChromaBoy.Hardware
             if (parent.Memory.UpdateAudioLength2)
             {
                 parent.Memory.UpdateAudioLength2 = false;
-                ch2Len = (byte)(64 - (parent.Memory[0xFF16] & 0x3F));
+                ch2Len = (byte)(64 - (parent.Memory.Get(0xFF16) & 0x3F));
             }
             if ((parent.Memory.Get(0xFF19) & 0b1000000) != 0)
             {
@@ -136,7 +136,7 @@ namespace ChromaBoy.Hardware
 
             // Set Duty
             ch2.Duty = 0.125f;
-            switch ((parent.Memory[0xFF16] & 0b11000000) >> 6)
+            switch ((parent.Memory.Get(0xFF16) & 0b11000000) >> 6)
             {
                 case 0b01: ch2.Duty = 0.25f; break;
                 case 0b10: ch2.Duty = 0.5f; break;
@@ -144,7 +144,7 @@ namespace ChromaBoy.Hardware
             }
 
             // Set Frequency
-            ushort nr23 = (ushort)(parent.Memory[0xFF18] | ((parent.Memory[0xFF19] & 0b111) << 8));
+            ushort nr23 = (ushort)(parent.Memory.Get(0xFF18) | ((parent.Memory.Get(0xFF19) & 0b111) << 8));
             ch2.Frequency = (float)(131072.0 / (2048 - nr23)) * 2.0f;
 
             // Handle Triggers
@@ -152,7 +152,7 @@ namespace ChromaBoy.Hardware
             {
                 parent.Memory.TriggerAudio2 = false;
                 if (ch2Len == 0) ch2Len = 64;
-                ch2Vol = (byte)((parent.Memory[0xFF17] & 0xF0) >> 4);
+                ch2Vol = (byte)((parent.Memory.Get(0xFF17) & 0xF0) >> 4);
             }
         }
 
