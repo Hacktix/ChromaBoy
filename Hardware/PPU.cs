@@ -419,9 +419,11 @@ namespace ChromaBoy.Hardware
 
         private void Reset()
         {
+            parent.Memory.Set(0xFF44, 0);
+            parent.Memory.Set(0xFF41, 0);
+
             ly = 0;
-            parent.Memory.Set(0xFF44, ly);
-            parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)));
+            ChangeMode(0);
             wly = 0;
             drawingWindow = false;
             lx = 0;
