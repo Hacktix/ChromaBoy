@@ -67,11 +67,13 @@ namespace ChromaBoy.Hardware
             // Handle OAM DMA
             ProcessDMA();
 
-            if((parent.Memory.Get(0xFF40) & 0b10000000) == 0)
+            if ((parent.Memory.Get(0xFF40, true) & 0b10000000) == 0)
             {
                 if (!reset) Reset();
                 return;
             }
+            else if (reset && (parent.Memory.Get(0xFF40, true) & 0b10000000) != 0)
+                reset = false;
 
             // Handle operations based on mode
             switch(mode)
@@ -88,8 +90,8 @@ namespace ChromaBoy.Hardware
                     ++wly;
                     drawingWindow = false;
                 }
-                parent.Memory.Set(0xFF44, ly);
-                parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)));
+                parent.Memory.Set(0xFF44, ly, true);
+                parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)), true);
                 scanlineCycles = 1;
                 if (ly < 144) // Enter new scanline to draw
                     ChangeMode(2);
@@ -117,7 +119,7 @@ namespace ChromaBoy.Hardware
             if(oamBuf.Count < 10) // Only load up to 10 sprites per scanline
             {
                 ObjectSprite obj = new ObjectSprite(parent, (ushort)(0xFE00 + 4 * oamScanOffset++));
-                if (obj.X > 0 && (ly + 16) >= obj.Y && (ly + 16) < (obj.Y + ((parent.Memory.Get(0xFF40) & 0b100) == 0 ? 8 : 16)))
+                if (obj.X > 0 && (ly + 16) >= obj.Y && (ly + 16) < (obj.Y + ((parent.Memory.Get(0xFF40, true) & 0b100) == 0 ? 8 : 16)))
                     oamBuf.Add(obj);
             }
 
@@ -128,7 +130,7 @@ namespace ChromaBoy.Hardware
         #region Drawing
         private void ProcessDrawingCycle()
         {
-            if (lx == 0 && !drawingWindow && (parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && parent.Memory.Get(0xFF4B) <= 7)
+            if (lx == 0 && !drawingWindow && (parent.Memory.Get(0xFF40, true) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A, true) && parent.Memory.Get(0xFF4B, true) <= 7)
                 drawingWindow = true;
 
             FetchBackgroundPixels(); // Tick background pixel fetcher
@@ -141,7 +143,7 @@ namespace ChromaBoy.Hardware
 
             if (pixelFifo.Count > 0 && !fetchingSprite)
             {
-                if (scrollShifted != (parent.Memory.Get(0xFF43) % 8) && !drawingWindow)
+                if (scrollShifted != (parent.Memory.Get(0xFF43, true) % 8) && !drawingWindow)
                 {
                     scrollShifted++;
                     pixelFifo.Dequeue();
@@ -149,11 +151,11 @@ namespace ChromaBoy.Hardware
                 else
                 {
                     FifoPixel pixel = pixelFifo.Dequeue();
-                    byte color = (byte)((parent.Memory.Get(pixel.IsSpritePixel ? (0xFF48 + pixel.Palette) : 0xFF47) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
+                    byte color = (byte)((parent.Memory.Get(pixel.IsSpritePixel ? (0xFF48 + pixel.Palette) : 0xFF47, true) & (0b11 << (2 * pixel.PixelData))) >> (2 * pixel.PixelData));
 
                     LCDBuf1[lx++, ly] = (byte)(color + 1);
 
-                    if(!drawingWindow && (parent.Memory.Get(0xFF40) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A) && (lx + 7 == parent.Memory.Get(0xFF4B) || parent.Memory.Get(0xFF4B) < 7))
+                    if(!drawingWindow && (parent.Memory.Get(0xFF40, true) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A, true) && (lx + 7 == parent.Memory.Get(0xFF4B, true) || parent.Memory.Get(0xFF4B, true) < 7))
                     {
                         pixelFifo.Clear();
                         fetcherState = 0;
@@ -191,18 +193,18 @@ namespace ChromaBoy.Hardware
             switch(spriteFetcherState)
             {
                 case 0: // Fetch tile number
-                    if ((parent.Memory.Get(0xFF40) & 0b100) == 0)
+                    if ((parent.Memory.Get(0xFF40, true) & 0b100) == 0)
                         spriteTileNumber = fetchedSprite.TileNo;
                     else
                         spriteTileNumber = (byte)((ly - fetchedSprite.Y - 16) < 8 ? (fetchedSprite.TileNo & 0xFE) : (fetchedSprite.TileNo & 0xFE | 1));
                     break;
                 case 2: // Fetch Tile Data Low
-                    ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))));
-                    spriteTileData = parent.Memory.Get(lowDataAddr);
+                    ushort lowDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40, true) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))));
+                    spriteTileData = parent.Memory.Get(lowDataAddr, true);
                     break;
                 case 4: // Fetch Tile Data High
-                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))) + 1);
-                    spriteTileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
+                    ushort highDataAddr = (ushort)(0x8000 + 16 * spriteTileNumber + 2 * (fetchedSprite.HasAttribute(SpriteAttribute.YFlip) ? ((parent.Memory.Get(0xFF40, true) & 0b100) != 0 ? 15 : 7) - (ly - (fetchedSprite.Y - 16)) : (ly - (fetchedSprite.Y - 16))) + 1);
+                    spriteTileData += (ushort)(parent.Memory.Get(highDataAddr, true) << 8);
                     break;
                 case 6: // Merge sprite pixels with FIFO
                     if(!fetchedSprite.HasAttribute(SpriteAttribute.XFlip))
@@ -261,7 +263,7 @@ namespace ChromaBoy.Hardware
 
         private void CheckForSprite()
         {
-            if((parent.Memory.Get(0xFF40) & 0b10) == 0)
+            if((parent.Memory.Get(0xFF40, true) & 0b10) == 0)
                 return;
             for(int i = 0; i < oamBuf.Count; i++)
             {
@@ -293,22 +295,22 @@ namespace ChromaBoy.Hardware
             {
                 case 0: // Fetch tile number
                     ushort baseTileAddr = 0x9800;
-                    if ((parent.Memory.Get(0xFF40) & 0b1000) != 0 && !drawingWindow)
+                    if ((parent.Memory.Get(0xFF40, true) & 0b1000) != 0 && !drawingWindow)
                         baseTileAddr = 0x9C00;
-                    else if ((parent.Memory.Get(0xFF40) & 0b1000000) != 0 && drawingWindow)
+                    else if ((parent.Memory.Get(0xFF40, true) & 0b1000000) != 0 && drawingWindow)
                         baseTileAddr = 0x9C00;
-                    int addressOffset = drawingWindow ? (fetchOffset++ + 32 * (wly / 8)) : (((fetchOffset++ + parent.Memory.Get(0xFF43) / 8) % 32) + 32 * (((ly + parent.Memory.Get(0xFF42)) / 8) % 32));
-                    tileNumber = parent.Memory.Get(baseTileAddr + addressOffset);
+                    int addressOffset = drawingWindow ? (fetchOffset++ + 32 * (wly / 8)) : (((fetchOffset++ + parent.Memory.Get(0xFF43, true) / 8) % 32) + 32 * (((ly + parent.Memory.Get(0xFF42, true)) / 8) % 32));
+                    tileNumber = parent.Memory.Get(baseTileAddr + addressOffset, true);
                     break;
                 case 2: // Fetch Tile Data Low
-                    ushort lowDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
-                    lowDataAddr = (ushort)(lowDataAddr + (lowDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (drawingWindow ? (wly % 8) : ((ly + parent.Memory.Get(0xFF42)) % 8)));
-                    tileData = parent.Memory.Get(lowDataAddr);
+                    ushort lowDataAddr = (ushort)((parent.Memory.Get(0xFF40, true) & 0b10000) == 0 ? 0x9000 : 0x8000);
+                    lowDataAddr = (ushort)(lowDataAddr + (lowDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (drawingWindow ? (wly % 8) : ((ly + parent.Memory.Get(0xFF42, true)) % 8)));
+                    tileData = parent.Memory.Get(lowDataAddr, true);
                     break;
                 case 4: // Fetch Tile Data High
-                    ushort highDataAddr = (ushort)((parent.Memory.Get(0xFF40) & 0b10000) == 0 ? 0x9000 : 0x8000);
-                    highDataAddr = (ushort)(highDataAddr + (highDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (drawingWindow ? (wly % 8) : ((ly + parent.Memory.Get(0xFF42)) % 8)) + 1);
-                    tileData += (ushort)(parent.Memory.Get(highDataAddr) << 8);
+                    ushort highDataAddr = (ushort)((parent.Memory.Get(0xFF40, true) & 0b10000) == 0 ? 0x9000 : 0x8000);
+                    highDataAddr = (ushort)(highDataAddr + (highDataAddr == 0x8000 ? tileNumber : (int)(sbyte)tileNumber) * 16 + 2 * (drawingWindow ? (wly % 8) : ((ly + parent.Memory.Get(0xFF42, true)) % 8)) + 1);
+                    tileData += (ushort)(parent.Memory.Get(highDataAddr, true) << 8);
                     break;
                 case 6: // Attempt push
                     if(!fetchedFirstTile)
@@ -321,7 +323,7 @@ namespace ChromaBoy.Hardware
                         for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
                         {
                             ushort tmp = (ushort)(tileData & bmp);
-                            pixelFifo.Enqueue((parent.Memory.Get(0xFF40) & 1) == 0 ? new FifoPixel(0, false) : new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), false));
+                            pixelFifo.Enqueue((parent.Memory.Get(0xFF40, true) & 1) == 0 ? new FifoPixel(0, false) : new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), false));
                             if (bit == 0) break;
                         }
                         fetcherState = 0;
@@ -343,7 +345,7 @@ namespace ChromaBoy.Hardware
                 ushort transferAddress = (ushort)(parent.Memory.DMAAddr + dmaOffset);
                 if (transferAddress >= 0xE000 && transferAddress <= 0xFFFF)
                     transferAddress -= 0x1000;
-                byte value = parent.Memory.Get(transferAddress);
+                byte value = parent.Memory.Get(transferAddress, true);
                 parent.Memory.LastDMAValue = value;
 
                 if (!dmaInit)
@@ -360,7 +362,7 @@ namespace ChromaBoy.Hardware
                     }
 
                     // Copy memory
-                    parent.Memory.Set(0xFE00 + dmaOffset, value);
+                    parent.Memory.Set(0xFE00 + dmaOffset, value, true);
                     dmaOffset++;
                     dmaCooldown = 3;
                     
@@ -378,10 +380,10 @@ namespace ChromaBoy.Hardware
         private void ChangeMode(byte newMode)
         {
             mode = newMode;
-            parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111000) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000) | mode));
+            parent.Memory.Set(0xFF41, (byte)(((parent.Memory.Get(0xFF41) & 0b11111000) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)) + mode), true);
 
             if (mode == 1) // VBlank Interrupt
-                parent.Memory.Set(0xFF0F, (byte)(parent.Memory.Get(0xFF0F) | 1));
+                parent.Memory.Set(0xFF0F, (byte)(parent.Memory.Get(0xFF0F, true) | 1), true);
 
             UpdateStatInterrupts();
 
@@ -396,8 +398,8 @@ namespace ChromaBoy.Hardware
         private void StartNewFrame()
         {
             ly = 0;
-            parent.Memory.Set(0xFF44, ly);
-            parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41) & 0b1111001) | (ly == parent.Memory.Get(0xFF45) ? 0b100 : 0b000)));
+            parent.Memory.Set(0xFF44, ly, true);
+            parent.Memory.Set(0xFF41, (byte)((parent.Memory.Get(0xFF41, true) & 0b1111001) | (ly == parent.Memory.Get(0xFF45, true) ? 0b100 : 0b000)), true);
             wly = 0;
             ChangeMode(2);
 
@@ -411,10 +413,10 @@ namespace ChromaBoy.Hardware
         private void UpdateStatInterrupts()
         {
             bool stat = false;
-            if ((parent.Memory.Get(0xFF41) & 0b1000000) != 0 && ly == parent.Memory.Get(0xFF45)) stat = true;
-            else if ((parent.Memory.Get(0xFF41) & 0b100000) != 0 && mode == 2) stat = true;
-            else if ((parent.Memory.Get(0xFF41) & 0b10000) != 0 && mode == 1) stat = true;
-            else if ((parent.Memory.Get(0xFF41) & 0b1000) != 0 && mode == 0) stat = true;
+            if ((parent.Memory.Get(0xFF41, true) & 0b1000000) != 0 && ly == parent.Memory.Get(0xFF45, true)) stat = true;
+            else if ((parent.Memory.Get(0xFF41, true) & 0b100000) != 0 && mode == 2) stat = true;
+            else if ((parent.Memory.Get(0xFF41, true) & 0b10000) != 0 && mode == 1) stat = true;
+            else if ((parent.Memory.Get(0xFF41, true) & 0b1000) != 0 && mode == 0) stat = true;
 
             if(stat != lastStat)
             {
@@ -426,9 +428,9 @@ namespace ChromaBoy.Hardware
         private void Reset()
         {
             ly = 0;
-            parent.Memory.Set(0xFF44, ly);
-            parent.Memory.Set(0xFF41, (byte)(parent.Memory.Get(0xFF41) & 0b11111000));
+            parent.Memory.Set(0xFF44, ly, true);
             ChangeMode(0);
+            parent.Memory.Set(0xFF41, (byte)(parent.Memory.Get(0xFF41, true) & 0b11111000), true);
             wly = 0;
             drawingWindow = false;
             lx = 0;
