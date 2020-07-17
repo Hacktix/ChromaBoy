@@ -30,7 +30,7 @@ namespace ChromaBoy.Hardware
             this.BOOTROM = bootrom;
             this.parent = parent;
 
-            RAM[0xFF00] = 0xFF;
+            RAM[0xFF00] = 0b11000000;
         }
 
         public bool DMATransfer = false;
