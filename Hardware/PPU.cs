@@ -424,8 +424,8 @@ namespace ChromaBoy.Hardware
         {
             ly = 0;
             parent.Memory.Set(0xFF44, ly);
-            parent.Memory.Set(0xFF41, (byte)(parent.Memory.Get(0xFF41) & 0b1111000));
-            mode = 2;
+            parent.Memory.Set(0xFF41, (byte)(parent.Memory.Get(0xFF41) & 0b11111000));
+            ChangeMode(0);
             wly = 0;
             drawingWindow = false;
             lx = 0;

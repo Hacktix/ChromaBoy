@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime;
 
 namespace ChromaBoy.Hardware
 {
@@ -28,6 +29,8 @@ namespace ChromaBoy.Hardware
             this.RAM = new byte[0x10000];
             this.BOOTROM = bootrom;
             this.parent = parent;
+
+            RAM[0xFF00] = 0xFF;
         }
 
         public bool DMATransfer = false;
@@ -57,8 +60,8 @@ namespace ChromaBoy.Hardware
                 if(i <= 0xFF && BOOTROM != null && RAM[0xFF50] == 0) return BOOTROM[i];
 
                 // VRAM & OAM Lock
-                if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return 0xFF;
-                if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return 0xFF;
+                //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return 0xFF;
+                //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return 0xFF;
 
                 // Inputs
                 if (i == 0xFF00)
@@ -66,6 +69,36 @@ namespace ChromaBoy.Hardware
                     if ((RAM[0xFF00] & 0b10000) == 0) return (byte)(RAM[0xFF00] | (Emulator.InputBits & 0x0F));
                     else if ((RAM[0xFF00] & 0b100000) == 0) return (byte)(RAM[0xFF00] | ((Emulator.InputBits & 0xF0) >> 4));
                 }
+
+                switch(i)
+                {
+                    case 0xFF02: return (byte)(RAM[0xFF02] | 0b1111110);
+                    case 0xFF03: return 0xFF;
+                    case 0xFF07: return (byte)(RAM[0xFF07] | 0b11111000);
+                    case 0xFF08:
+                    case 0xFF09:
+                    case 0xFF0A:
+                    case 0xFF0B:
+                    case 0xFF0C:
+                    case 0xFF0D:
+                    case 0xFF0E: return 0xFF;
+                    case 0xFF0F: return (byte)(RAM[0xFF0F] | 0b11100000);
+                    case 0xFF10: return (byte)(RAM[0xFF10] | 0b10000000);
+                    case 0xFF15: return 0xFF;
+                    case 0xFF1A: return (byte)(RAM[0xFF1A] | 0b01111111);
+                    case 0xFF1C: return (byte)(RAM[0xFF1C] | 0b10011111);
+                    case 0xFF1F: return 0xFF;
+                    case 0xFF20: return (byte)(RAM[0xFF20] | 0b11000000);
+                    case 0xFF23: return (byte)(RAM[0xFF23] | 0b00111111);
+                    case 0xFF26: return (byte)(RAM[0xFF26] | 0b01110000);
+                    case 0xFF27:
+                    case 0xFF28:
+                    case 0xFF29: return 0xFF;
+                    case 0xFF41: return (byte)(RAM[0xFF41] | 0b10000000);
+                }
+
+                if (i >= 0xFF4C && i <= 0xFF7F)
+                    return 0xFF;
 
                 if (MBC.HandleRead(i)) return MBC.MBCRead(i);
                 if (MBC.IsAddressReadable(i))
@@ -80,8 +113,8 @@ namespace ChromaBoy.Hardware
             set
             {
                 // VRAM & OAM Lock
-                if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return;
-                if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
+                //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return;
+                //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
 
                 // Audio Channel Updates
                 if (i >= 0xFF10 && i <= 0xFF14) UpdateAudioChannel1 = true;
@@ -96,7 +129,7 @@ namespace ChromaBoy.Hardware
                 switch (i)
                 {
                     case 0xFF00:
-                        RAM[0xFF00] = (byte)(value & 0b110000);
+                        RAM[0xFF00] = (byte)((RAM[0xFF00] & 0b11001111) | (value & 0b110000));
                         break;
                     case 0xFF04:
                         RAM[0xFF04] = 0;
@@ -114,6 +147,9 @@ namespace ChromaBoy.Hardware
                         DMATransfer = true;
                         DMAAddr = (ushort)(0x100 * value);
                         break;
+                    case 0xFF0F:
+                        RAM[0xFF0F] = (byte)(value & 0b11111);
+                        return;
                     default:
                         if (MBC.HandleWrite(i, value))
                         {
