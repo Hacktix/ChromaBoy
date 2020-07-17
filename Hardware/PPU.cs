@@ -340,25 +340,26 @@ namespace ChromaBoy.Hardware
         {
             if(parent.Memory.DMATransfer)
             {
-                if(!dmaInit)
+                ushort transferAddress = (ushort)(parent.Memory.DMAAddr + dmaOffset);
+                if (transferAddress >= 0xE000 && transferAddress <= 0xFFFF)
+                    transferAddress -= 0x1000;
+                byte value = parent.Memory.Get(transferAddress);
+                parent.Memory.LastDMAValue = value;
+
+                if (!dmaInit)
                 {
                     // Initialize DMA in first cycle
                     dmaOffset = 0;
                     dmaInit = true;
                 } else {
                     // Handle cooldown cycles
-                    if(dmaCooldown > 0)
+                    if (dmaCooldown > 0)
                     {
                         dmaCooldown--;
                         return;
                     }
 
                     // Copy memory
-                    ushort transferAddress = (ushort)(parent.Memory.DMAAddr + dmaOffset);
-                    if (transferAddress >= 0xE000 && transferAddress <= 0xFFFF)
-                        transferAddress -= 0x1000;
-                    byte value = parent.Memory.Get(transferAddress);
-                    parent.Memory.LastDMAValue = value;
                     parent.Memory.Set(0xFE00 + dmaOffset, value);
                     dmaOffset++;
                     dmaCooldown = 3;

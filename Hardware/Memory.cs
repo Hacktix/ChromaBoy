@@ -61,8 +61,11 @@ namespace ChromaBoy.Hardware
                 if(i <= 0xFF && BOOTROM != null && RAM[0xFF50] == 0) return BOOTROM[i];
 
                 // VRAM & OAM Lock
-                //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return 0xFF;
-                //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return 0xFF;
+                if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return 0xFF;
+                if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return 0xFF;
+
+                // OAM DMA Lock
+                if (DMATransfer && i < 0xFF80 && i > 0xFFFE) return LastDMAValue;
 
                 // Inputs
                 if (i == 0xFF00)
@@ -114,8 +117,11 @@ namespace ChromaBoy.Hardware
             set
             {
                 // VRAM & OAM Lock
-                //if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return;
-                //if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
+                if (i >= 0x8000 && i <= 0x9FFF && LockVRAM) return;
+                if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
+
+                // OAM DMA Lock
+                if (DMATransfer && i < 0xFF80 && i > 0xFFFE) return;
 
                 // Audio Channel Updates
                 if (i >= 0xFF10 && i <= 0xFF14) UpdateAudioChannel1 = true;
