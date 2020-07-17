@@ -354,7 +354,10 @@ namespace ChromaBoy.Hardware
                     }
 
                     // Copy memory
-                    parent.Memory.Set(0xFE00 + dmaOffset, parent.Memory.Get(parent.Memory.DMAAddr + dmaOffset));
+                    ushort transferAddress = (ushort)(parent.Memory.DMAAddr + dmaOffset);
+                    if (transferAddress >= 0xE000 && transferAddress <= 0xFFFF)
+                        transferAddress -= 0x1000;
+                    parent.Memory.Set(0xFE00 + dmaOffset, parent.Memory.Get(transferAddress));
                     dmaOffset++;
                     dmaCooldown = 3;
                     
@@ -422,7 +425,6 @@ namespace ChromaBoy.Hardware
             ly = 0;
             parent.Memory.Set(0xFF44, ly);
             parent.Memory.Set(0xFF41, (byte)(parent.Memory.Get(0xFF41) & 0b1111000));
-            ChangeMode(0);
             mode = 2;
             wly = 0;
             drawingWindow = false;
