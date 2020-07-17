@@ -15,7 +15,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11000000) == 0b01000000) return new BIT(parent, code);
             else if ((code & 0b11000000) == 0b10000000) return new RES(parent, code);
             else if ((code & 0b11000000) == 0b11000000) return new SET(parent, code);
-            throw new NotImplementedException();
+            throw new NotImplementedException("Unknown opcode 0xCB" + code.ToString("X2") + " at $" + parent.PC);
         }
 
         public static Opcode DecodeOpcode(Gameboy parent, byte code)
@@ -77,7 +77,7 @@ namespace ChromaBoy.Software
             else if ((code & 0b11101111) == 0b11001001) return new RET(parent, code);
             else if ((code & 0b11100111) == 0b11000000) return new CRET(parent, code);
             else if ((code & 0b11000111) == 0b11000111) return new RST(parent, code);
-            throw new NotImplementedException();
+            throw new NotImplementedException("Unknown opcode 0x" + code.ToString("X2") + " at $" + parent.PC);
         }
     }
 }

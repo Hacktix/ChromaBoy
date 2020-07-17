@@ -35,6 +35,7 @@ namespace ChromaBoy.Hardware
 
         public bool DMATransfer = false;
         public ushort DMAAddr = 0;
+        public byte LastDMAValue = 0;
 
         public void Set(int addr, byte value)
         {
@@ -144,8 +145,12 @@ namespace ChromaBoy.Hardware
                         UpdatedSTAT = true;
                         break;
                     case 0xFF46:
-                        DMATransfer = true;
-                        DMAAddr = (ushort)(0x100 * value);
+                        RAM[0xFF46] = value;
+                        if(!DMATransfer)
+                        {
+                            DMATransfer = true;
+                            DMAAddr = (ushort)(0x100 * value);
+                        }
                         break;
                     case 0xFF0F:
                         RAM[0xFF0F] = (byte)(value & 0b11111);

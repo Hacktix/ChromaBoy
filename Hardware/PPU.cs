@@ -357,7 +357,9 @@ namespace ChromaBoy.Hardware
                     ushort transferAddress = (ushort)(parent.Memory.DMAAddr + dmaOffset);
                     if (transferAddress >= 0xE000 && transferAddress <= 0xFFFF)
                         transferAddress -= 0x1000;
-                    parent.Memory.Set(0xFE00 + dmaOffset, parent.Memory.Get(transferAddress));
+                    byte value = parent.Memory.Get(transferAddress);
+                    parent.Memory.LastDMAValue = value;
+                    parent.Memory.Set(0xFE00 + dmaOffset, value);
                     dmaOffset++;
                     dmaCooldown = 3;
                     
