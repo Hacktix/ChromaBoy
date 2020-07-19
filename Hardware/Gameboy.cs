@@ -32,12 +32,11 @@ namespace ChromaBoy.Hardware
         public bool Standby = false;
         public bool InterruptsEnabled = false;
         public bool EINextInstruction = false;
-        public long CycleCount = 0;
 
         public bool CallInterruptHandler = true;
         public bool HaltBug = false;
 
-        public ushort DivRegister = 0xABCC;
+        public ushort DivRegister = 0;
         private bool LastTimerAndResult = false;
         private bool TimerAndResult = false;
         public sbyte TimerReloadCooldown = -1;
@@ -83,6 +82,7 @@ namespace ChromaBoy.Hardware
             WriteRegister16(Register16.DE, 0x00D8);
             WriteRegister16(Register16.HL, 0x014D);
             SP = 0xFFFE;
+            DivRegister = 0xABCC;
             Memory.Set(0xFF05, 0x00);
             Memory.Set(0xFF06, 0x00);
             Memory.Set(0xFF07, 0x00);
@@ -124,7 +124,6 @@ namespace ChromaBoy.Hardware
             while (cycleCounter-- > 0)
             {
                 CycleTimer.Start();
-                CycleCount++;
                 HandleTimers();
                 PPU.ProcessCycle();
                 APU.ProcessCycle();
@@ -252,28 +251,32 @@ namespace ChromaBoy.Hardware
         private void HandleTimers()
         {
             DivRegister++;
-            Memory.Set(0xFF04, (byte)((DivRegister & 0xFF00) >> 8));
 
-            int shiftCnt = (Memory[0xFF07] & 0b11) == 0 ? 6 : (Memory[0xFF07] & 0b11) == 1 ? 0 : (Memory[0xFF07] & 0b11) == 2 ? 2 : 4;
-            ushort dbmp = (ushort)(0b1000 << shiftCnt);
-
-            TimerAndResult = ((DivRegister & dbmp) & ((Memory[0xFF07] & 0b100) << (shiftCnt+1))) > 0;
+            int bit = 0;
+            switch(Memory.Get(0xFF07) & 0b11)
+            {
+                case 0b00: bit = 9; break;
+                case 0b01: bit = 3; break;
+                case 0b10: bit = 5; break;
+                case 0b11: bit = 7; break;
+            }
+            TimerAndResult = ((DivRegister & (1 << bit)) >> bit) != 0 && ((Memory.Get(0xFF07) & 0b100) >> 2) != 0;
             if(TimerAndResult != LastTimerAndResult)
             {
                 LastTimerAndResult = TimerAndResult;
                 if(!TimerAndResult)
                 {
-                    if (Memory[0xFF05] == 0xFF)
+                    if (Memory.Get(0xFF05) == 0xFF)
                     {
-                        Memory[0xFF05] = 0;
-                        TimerReloadCooldown = 4;
+                        Memory.Set(0xFF05, 0);
+                        TimerReloadCooldown = 3;
                         Memory[0xFF0F] |= 0b100;
                     }
-                    else Memory[0xFF05]++;
+                    else Memory.Set(0xFF05, (byte)(Memory.Get(0xFF05) + 1));
                 }
             }
 
-            if (TimerReloadCooldown > -1 && --TimerReloadCooldown == -1) Memory[0xFF05] = Memory[0xFF06];
+            if (TimerReloadCooldown > -1 && --TimerReloadCooldown == -1) Memory.Set(0xFF05, Memory.Get(0xFF06));
         }
 
         public void WriteRegister16(Register16 regpair, ushort value)

@@ -30,7 +30,7 @@ namespace ChromaBoy.Hardware
             this.BOOTROM = bootrom;
             this.parent = parent;
 
-            RAM[0xFF00] = 0xFF;
+            RAM[0xFF00] = 0xCF;
         }
 
         public bool DMATransfer = false;
@@ -89,6 +89,7 @@ namespace ChromaBoy.Hardware
                 {
                     case 0xFF02: return (byte)(RAM[0xFF02] | 0b1111110);
                     case 0xFF03: return 0xFF;
+                    case 0xFF04: return (byte)((parent.DivRegister & 0xFF) >> 8);
                     case 0xFF07: return (byte)(RAM[0xFF07] | 0b11111000);
                     case 0xFF08:
                     case 0xFF09:
