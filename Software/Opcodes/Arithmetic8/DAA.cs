@@ -4,9 +4,7 @@ namespace ChromaBoy.Software.Opcodes
 {
     public class DAA : Opcode // DAA
     {
-        public DAA(Gameboy parent) : base(parent) {
-            Cycles = 4;
-        }
+        public DAA(Gameboy parent) : base(parent) { }
 
         public override void Execute()
         {

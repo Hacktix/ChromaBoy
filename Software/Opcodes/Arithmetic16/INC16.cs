@@ -9,7 +9,7 @@ namespace ChromaBoy.Software.Opcodes
         public INC16(Gameboy parent, byte opcode) : base(parent) {
             target = OpcodeUtils.BitsToRegister16((opcode & 0b1110000) >> 4);
 
-            Cycles = 12;
+            Cycles = 8;
         }
 
         public override void Execute()

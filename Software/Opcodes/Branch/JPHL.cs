@@ -4,9 +4,7 @@ namespace ChromaBoy.Software.Opcodes
 {
     public class JPHL : Opcode // JP HL
     {
-        public JPHL(Gameboy parent) : base(parent) {
-            Cycles = 4;
-        }
+        public JPHL(Gameboy parent) : base(parent) { }
 
         public override void Execute()
         {
