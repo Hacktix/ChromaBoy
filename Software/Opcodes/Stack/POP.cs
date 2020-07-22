@@ -11,6 +11,8 @@ namespace ChromaBoy.Software.Opcodes
             if (target == Register16.SP) target = Register16.AF;
 
             Cycles = 12;
+
+            Disassembly = "pop " + OpcodeUtils.Register16ToString(target);
         }
 
         public override void Execute()

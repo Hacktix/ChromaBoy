@@ -10,7 +10,7 @@ namespace ChromaBoy.Software.Opcodes
             target = OpcodeUtils.BitsToRegister16((opcode & 0b1110000) >> 4);
 
             Cycles = 8;
-            Disassembly = "INC " + OpcodeUtils.Register16ToString(target);
+            Disassembly = "inc " + OpcodeUtils.Register16ToString(target);
         }
 
         public override void Execute()

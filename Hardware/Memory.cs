@@ -14,6 +14,7 @@ namespace ChromaBoy.Hardware
         public bool UpdatedSTAT = false;
         public bool LockVRAM = false;
         public bool LockOAM = false;
+        public bool LockDMA = false;
 
         public bool UpdateAudioChannel1 = false;
         public bool UpdateAudioChannel2 = false;
@@ -35,7 +36,7 @@ namespace ChromaBoy.Hardware
 
         public bool DMATransfer = false;
         public ushort DMAAddr = 0;
-        public byte LastDMAValue = 0;
+        public byte LastDMAValue = 0xFF;
 
         public void Set(int i, byte value, bool accessOverride = false)
         {
@@ -73,7 +74,7 @@ namespace ChromaBoy.Hardware
                 if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return 0xFF;
 
                 // OAM DMA Lock
-                if (DMATransfer && i < 0xFF80 && i > 0xFFFE) return LastDMAValue;
+                // if (LockDMA && (i < 0xFF80 || i > 0xFFFE)) return LastDMAValue;
 
                 // Bootrom Translation
                 if (i <= 0xFF && BOOTROM != null && RAM[0xFF50] == 0) return BOOTROM[i];
@@ -125,7 +126,7 @@ namespace ChromaBoy.Hardware
                 if (i >= 0xFE00 && i <= 0xFE9F && LockOAM) return;
 
                 // OAM DMA Lock
-                if (DMATransfer && i < 0xFF80 && i > 0xFFFE) return;
+                // if (LockDMA && (i < 0xFF80 || i > 0xFFFE)) return;
 
                 // Audio Channel Updates
                 if (i >= 0xFF10 && i <= 0xFF14) UpdateAudioChannel1 = true;

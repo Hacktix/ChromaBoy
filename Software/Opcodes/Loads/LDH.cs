@@ -18,6 +18,8 @@ namespace ChromaBoy.Software.Opcodes
 
             TickAccurate = true;
             actionTick = regC ? 2 : 4;
+
+            Disassembly = load ? "ld a, [$" + ((ushort)(0xFF00 + (regC ? parent.Registers[Register.C] : parent.Memory[parent.PC + 1]))).ToString("X4") + "]" : "ld [$" + ((ushort)(0xFF00 + (regC ? parent.Registers[Register.C] : parent.Memory[parent.PC + 1]))).ToString("X4") + "], a";
         }
 
         public override void ExecuteTick()

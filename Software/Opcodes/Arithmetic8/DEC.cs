@@ -10,7 +10,7 @@ namespace ChromaBoy.Software.Opcodes
             target = OpcodeUtils.BitsToRegister((opcode & 0b111000) >> 3);
 
             Cycles = target == Register.M ? 12 : 4;
-            Disassembly = "DEC " + (target == Register.M ? "$" + ((parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])).ToString("X4") : OpcodeUtils.RegisterToString(target));
+            Disassembly = "dec " + (target == Register.M ? "[hl]" : OpcodeUtils.RegisterToString(target));
         }
 
         public override void Execute()

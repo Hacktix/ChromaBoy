@@ -7,6 +7,8 @@ namespace ChromaBoy.Software.Opcodes
         public LDHLSP(Gameboy parent) : base(parent) {
             Cycles = 12;
             Length = 2;
+
+            Disassembly = "ld hl, " + ((ushort)(parent.ReadRegister16(Register16.SP) + (sbyte)parent.Memory[parent.PC + 1])).ToString("X1");
         }
 
         public override void Execute()

@@ -6,6 +6,7 @@ namespace ChromaBoy.Software.Opcodes
     {
         public STOP(Gameboy parent) : base(parent) {
             Length = 2;
+            Disassembly = "stop";
         }
 
         public override void Execute()

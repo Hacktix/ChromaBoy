@@ -4,7 +4,9 @@ namespace ChromaBoy.Software.Opcodes
 {
     public class HALT : Opcode // HALT
     {
-        public HALT(Gameboy parent) : base(parent) { }
+        public HALT(Gameboy parent) : base(parent) {
+            Disassembly = "halt";
+        }
 
         public override void Execute()
         {

@@ -10,7 +10,7 @@ namespace ChromaBoy.Software.Opcodes
             addr = (ushort)(opcode & 0b00111000);
 
             Cycles = 16;
-            Disassembly = "RST $" + (addr & 0xFF).ToString("X2");
+            Disassembly = "rst $" + (addr & 0xFF).ToString("X2");
         }
 
         public override void Execute()

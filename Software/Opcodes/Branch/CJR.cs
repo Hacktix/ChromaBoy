@@ -14,7 +14,7 @@ namespace ChromaBoy.Software.Opcodes
             Length = 2;
             Cycles = 12;
 
-            Disassembly = "JR " + (cFlagSet ? "" : "N") + OpcodeUtils.FlagToString(cFlag) + " $" + parent.Memory[parent.PC + 1].ToString("X2");
+            Disassembly = "jr " + (cFlagSet ? "" : "n") + OpcodeUtils.FlagToString(cFlag) + ", $" + (parent.PC + (sbyte)parent.Memory[parent.PC + 1] + 2).ToString("X4");
         }
 
         public override void Execute()

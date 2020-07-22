@@ -15,6 +15,8 @@ namespace ChromaBoy.Software.Opcodes
 
             Length = 2;
             Cycles = (target == Register.M) ? 16 : 8;
+
+            Disassembly = (left ? "rl" : "rr") + (useCarry ? "c" : "") + " " + OpcodeUtils.RegisterToString(target);
         }
 
         public override void Execute()

@@ -354,6 +354,8 @@ namespace ChromaBoy.Hardware
                     dmaOffset = 0;
                     dmaInit = true;
                 } else {
+                    if (!parent.Memory.LockDMA) parent.Memory.LockDMA = true;
+
                     // Handle cooldown cycles
                     if (dmaCooldown > 0)
                     {
@@ -361,16 +363,17 @@ namespace ChromaBoy.Hardware
                         return;
                     }
 
+                    if (dmaOffset == 0xA0) // If end of DMA copy block has been reached
+                    {
+                        dmaInit = false;
+                        parent.Memory.DMATransfer = false;
+                        parent.Memory.LockDMA = false;
+                    }
+
                     // Copy memory
                     parent.Memory.Set(0xFE00 + dmaOffset, value, true);
                     dmaOffset++;
                     dmaCooldown = 3;
-                    
-                    if(dmaOffset == 0xA0) // If end of DMA copy block has been reached
-                    {
-                        dmaInit = false;
-                        parent.Memory.DMATransfer = false;
-                    }
                 }
             }
         }

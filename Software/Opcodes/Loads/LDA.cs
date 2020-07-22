@@ -12,6 +12,8 @@ namespace ChromaBoy.Software.Opcodes
             regpair = (opcode & 0b10000) > 0 ? Register16.DE : Register16.BC;
 
             Cycles = 8;
+
+            Disassembly = load ? "ld a, [" + OpcodeUtils.Register16ToString(regpair) + "]" : "ld [" + OpcodeUtils.Register16ToString(regpair) + "], a";
         }
 
         public override void Execute()

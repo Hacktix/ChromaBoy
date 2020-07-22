@@ -4,7 +4,9 @@ namespace ChromaBoy.Software.Opcodes
 {
     public class CPL : Opcode // CPL
     {
-        public CPL(Gameboy parent) : base(parent) { }
+        public CPL(Gameboy parent) : base(parent) {
+            Disassembly = "cpl";
+        }
 
         public override void Execute()
         {

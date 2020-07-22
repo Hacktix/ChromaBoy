@@ -11,6 +11,8 @@ namespace ChromaBoy.Software.Opcodes
 
             Cycles = 12;
             Length = 3;
+
+            Disassembly = "ld " + OpcodeUtils.Register16ToString(target) + ", $" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X2");
         }
 
         public override void Execute()

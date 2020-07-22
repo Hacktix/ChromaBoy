@@ -8,7 +8,7 @@ namespace ChromaBoy.Software.Opcodes
         public ADDSP(Gameboy parent) : base(parent) {
             Cycles = 16;
             Length = 2;
-            Disassembly = "ADD SP, $" + parent.Memory[parent.PC + 1].ToString("X2");
+            Disassembly = "add sp, $" + parent.Memory[parent.PC + 1].ToString("X2");
         }
 
         public override void Execute()

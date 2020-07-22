@@ -5,7 +5,7 @@ namespace ChromaBoy.Software.Opcodes
     public class DAA : Opcode // DAA
     {
         public DAA(Gameboy parent) : base(parent) {
-            Disassembly = "DAA";
+            Disassembly = "daa";
         }
 
         public override void Execute()

@@ -14,7 +14,7 @@ namespace ChromaBoy.Software.Opcodes
             Length = 3;
             Cycles = 24;
 
-            Disassembly = "CALL " + (cFlagSet ? "" : "N") + OpcodeUtils.FlagToString(cFlag) + " $" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X4");
+            Disassembly = "call " + (cFlagSet ? "" : "n") + OpcodeUtils.FlagToString(cFlag) + ", $" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X1");
         }
 
         public override void Execute()

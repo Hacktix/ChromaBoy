@@ -11,6 +11,8 @@ namespace ChromaBoy.Software.Opcodes
             if (source == Register16.SP) source = Register16.AF;
 
             Cycles = 16;
+
+            Disassembly = "push " + OpcodeUtils.Register16ToString(source);
         }
 
         public override void Execute()

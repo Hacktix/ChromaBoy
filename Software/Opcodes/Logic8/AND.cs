@@ -10,6 +10,8 @@ namespace ChromaBoy.Software.Opcodes
             source = OpcodeUtils.BitsToRegister(opcode & 0b111);
 
             Cycles = source == Register.M ? 8 : 4;
+
+            Disassembly = "and " + (source == Register.M ? "[hl]" : OpcodeUtils.RegisterToString(source));
         }
 
         public override void Execute()

@@ -7,6 +7,8 @@ namespace ChromaBoy.Software.Opcodes
         public LDMSP(Gameboy parent) : base(parent) {
             Cycles = 20;
             Length = 3;
+
+            Disassembly = "ld [$" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X4") + "]";
         }
 
         public override void Execute()

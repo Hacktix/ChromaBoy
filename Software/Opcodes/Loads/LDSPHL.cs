@@ -6,6 +6,8 @@ namespace ChromaBoy.Software.Opcodes
     {
         public LDSPHL(Gameboy parent) : base(parent) {
             Cycles = 8;
+
+            Disassembly = "ld sp, hl";
         }
 
         public override void Execute()

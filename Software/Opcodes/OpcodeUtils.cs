@@ -36,13 +36,13 @@ namespace ChromaBoy.Software.Opcodes
         {
             switch(reg)
             {
-                case Register.A: return "A";
-                case Register.B: return "B";
-                case Register.C: return "C";
-                case Register.D: return "D";
-                case Register.E: return "E";
-                case Register.H: return "H";
-                case Register.L: return "L";
+                case Register.A: return "a";
+                case Register.B: return "b";
+                case Register.C: return "c";
+                case Register.D: return "d";
+                case Register.E: return "e";
+                case Register.H: return "h";
+                case Register.L: return "l";
                 default: return "Unknown register";
             }
         }
@@ -51,12 +51,12 @@ namespace ChromaBoy.Software.Opcodes
         {
             switch(reg)
             {
-                case Register16.AF: return "AF";
-                case Register16.BC: return "BC";
-                case Register16.DE: return "DE";
-                case Register16.HL: return "HL";
-                case Register16.PC: return "PC";
-                case Register16.SP: return "SP";
+                case Register16.AF: return "af";
+                case Register16.BC: return "bc";
+                case Register16.DE: return "de";
+                case Register16.HL: return "hl";
+                case Register16.PC: return "pc";
+                case Register16.SP: return "sp";
                 default: return "Unknown register pair";
             }
         }
@@ -65,10 +65,10 @@ namespace ChromaBoy.Software.Opcodes
         {
             switch(flag)
             {
-                case Flag.AddSub: return "N";
-                case Flag.Carry: return "C";
-                case Flag.HalfCarry: return "HC";
-                case Flag.Zero: return "Z";
+                case Flag.AddSub: return "n";
+                case Flag.Carry: return "c";
+                case Flag.HalfCarry: return "hc";
+                case Flag.Zero: return "z";
                 default: return "Unknown flag";
             }
         }

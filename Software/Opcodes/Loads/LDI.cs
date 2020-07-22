@@ -15,6 +15,8 @@ namespace ChromaBoy.Software.Opcodes
 
             TickAccurate = true;
             actionTick = target == Register.M ? 4 : 2;
+
+            Disassembly = "ld " + (target == Register.M ? "[hl]" : OpcodeUtils.RegisterToString(target)) + ", $" + parent.Memory[parent.PC + 1].ToString("X2");
         }
 
         public override void ExecuteTick()

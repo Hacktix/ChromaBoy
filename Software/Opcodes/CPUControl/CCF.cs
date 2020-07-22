@@ -4,7 +4,9 @@ namespace ChromaBoy.Software.Opcodes
 {
     public class CCF : Opcode // CCF
     {
-        public CCF(Gameboy parent) : base(parent) { }
+        public CCF(Gameboy parent) : base(parent) {
+            Disassembly = "ccf";        
+        }
 
         public override void Execute()
         {

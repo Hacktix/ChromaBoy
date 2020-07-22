@@ -7,6 +7,8 @@ namespace ChromaBoy.Software.Opcodes
         public ADI(Gameboy parent) : base(parent) {
             Length = 2;
             Cycles = 8;
+
+            Disassembly = "add $" + parent.Memory[parent.PC + 1].ToString("X2");
         }
 
         public override void Execute()

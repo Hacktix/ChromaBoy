@@ -13,7 +13,7 @@ namespace ChromaBoy.Software.Opcodes
 
             Cycles = 20;
 
-            Disassembly = "RET " + (cFlagSet ? "" : "N") + OpcodeUtils.FlagToString(cFlag);
+            Disassembly = "ret " + (cFlagSet ? "" : "n") + OpcodeUtils.FlagToString(cFlag);
         }
 
         public override void Execute()

@@ -14,7 +14,7 @@ namespace ChromaBoy.Software.Opcodes
             Cycles = target == Register.M ? 16 : 8;
             Length = 2;
 
-            Disassembly = "SET " + bit + ", " + (target == Register.M ? "$" + ((parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])).ToString("X4") : OpcodeUtils.RegisterToString(target));
+            Disassembly = "set $" + bit.ToString("X2") + ", " + (target == Register.M ? "[hl]" : OpcodeUtils.RegisterToString(target));
         }
 
         public override void Execute()

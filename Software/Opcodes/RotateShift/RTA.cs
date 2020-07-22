@@ -10,6 +10,8 @@ namespace ChromaBoy.Software.Opcodes
         public RTA(Gameboy parent, byte opcode) : base(parent) {
             left = (opcode & 0b1000) == 0;
             useCarry = (opcode & 0b10000) > 0;
+
+            Disassembly = "r" + (left ? "l" : "r") + (useCarry ? "c" : "") + "a";
         }
 
         public override void Execute()

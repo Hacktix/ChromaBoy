@@ -12,6 +12,8 @@ namespace ChromaBoy.Software.Opcodes
             load = (opcode & 0b1000) > 0;
 
             Cycles = 8;
+
+            Disassembly = load ? "ld a, [hl" + (inc ? "+" : "-") + "]" : "ld [hl" + (inc ? "+" : "-") + "], a";
         }
 
         public override void Execute()

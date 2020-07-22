@@ -15,6 +15,8 @@ namespace ChromaBoy.Software.Opcodes
 
             TickAccurate = true;
             actionTick = 8;
+
+            Disassembly = load ? "ld a, [$" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X4") + "]" : "ld [$" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X4") + "], a";
         }
 
         public override void ExecuteTick()

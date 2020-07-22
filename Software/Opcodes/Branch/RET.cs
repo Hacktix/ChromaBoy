@@ -10,7 +10,7 @@ namespace ChromaBoy.Software.Opcodes
             enableInt = (opcode & 0b10000) > 0;
 
             Cycles = 16;
-            Disassembly = "RET" + (enableInt ? "I" : "");
+            Disassembly = "ret" + (enableInt ? "i" : "");
         }
 
         public override void Execute()
