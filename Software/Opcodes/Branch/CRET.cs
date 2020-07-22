@@ -12,6 +12,8 @@ namespace ChromaBoy.Software.Opcodes
             cFlag = (opcode & 0b10000) > 0 ? Flag.Carry : Flag.Zero;
 
             Cycles = 20;
+
+            Disassembly = "RET " + (cFlagSet ? "" : "N") + OpcodeUtils.FlagToString(cFlag);
         }
 
         public override void Execute()

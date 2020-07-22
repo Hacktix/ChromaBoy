@@ -9,6 +9,7 @@ namespace ChromaBoy.Software.Opcodes
         public ADD16(Gameboy parent, byte opcode) : base(parent) {
             source = OpcodeUtils.BitsToRegister16((opcode & 0b110000) >> 4);
 
+            Disassembly = "ADD HL, " + OpcodeUtils.Register16ToString(source);
             Cycles = 8;
         }
 

@@ -7,6 +7,8 @@ namespace ChromaBoy.Software.Opcodes
         public CALL(Gameboy parent) : base(parent) {
             Length = 3;
             Cycles = 24;
+
+            Disassembly = "CALL $" + (parent.Memory[parent.PC + 1] + (parent.Memory[parent.PC + 2] << 8)).ToString("X4");
         }
 
         public override void Execute()

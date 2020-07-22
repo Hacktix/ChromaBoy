@@ -4,7 +4,9 @@ namespace ChromaBoy.Software.Opcodes
 {
     public class JPHL : Opcode // JP HL
     {
-        public JPHL(Gameboy parent) : base(parent) { }
+        public JPHL(Gameboy parent) : base(parent) {
+            Disassembly = "JP HL";
+        }
 
         public override void Execute()
         {

@@ -8,6 +8,7 @@ namespace ChromaBoy.Software
         public int Cycles = 4;
         public bool TickAccurate = false;
         public byte Tick = 0;
+        public string Disassembly = "No disassembly available";
 
         protected Gameboy parent;
 

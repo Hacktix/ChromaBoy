@@ -169,7 +169,7 @@ namespace ChromaBoy.Hardware
                 }
 
                 Opcode opcode = Decoder.DecodeOpcode(this, Memory[PC]);
-                if (logTrace) LogTrace(Memory.Get(PC));
+                if (logTrace) LogTrace(opcode);
                 if (opcode.TickAccurate) ExecOpcode = opcode;
                 else ExecOpcode = null;
 
@@ -189,8 +189,14 @@ namespace ChromaBoy.Hardware
             EndTime = PerformanceTimer.ElapsedTicks;
         }
 
-        private void LogTrace(byte opcode)
+        private void LogTrace(Opcode opcode)
         {
+            string memSection = "";
+            for(int i = 0; i < opcode.Length; i++)
+            {
+                memSection += Memory.Get(PC + i).ToString("X2");
+                if (i + 1 != opcode.Length) memSection += " ";
+            }
             logWriter.WriteLine("A: " + Registers[Register.A].ToString("X2") + " " +
                 "F: " + Registers[Register.F].ToString("X2") + " " +
                 "B: " + Registers[Register.B].ToString("X2") + " " +
@@ -201,7 +207,7 @@ namespace ChromaBoy.Hardware
                 "L: " + Registers[Register.L].ToString("X2") + " " +
                 "SP: " + SP.ToString("X4") + " " +
                 "PC: 00:" + PC.ToString("X4") + " | " +
-                opcode.ToString("X2")
+                opcode.Disassembly + " " + memSection
             );
             logWriter.Flush();
         }

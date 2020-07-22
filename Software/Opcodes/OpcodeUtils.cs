@@ -31,5 +31,46 @@ namespace ChromaBoy.Software.Opcodes
                 default: return Register16.SP;
             }
         }
+
+        public static string RegisterToString(Register reg)
+        {
+            switch(reg)
+            {
+                case Register.A: return "A";
+                case Register.B: return "B";
+                case Register.C: return "C";
+                case Register.D: return "D";
+                case Register.E: return "E";
+                case Register.H: return "H";
+                case Register.L: return "L";
+                default: return "Unknown register";
+            }
+        }
+
+        public static string Register16ToString(Register16 reg)
+        {
+            switch(reg)
+            {
+                case Register16.AF: return "AF";
+                case Register16.BC: return "BC";
+                case Register16.DE: return "DE";
+                case Register16.HL: return "HL";
+                case Register16.PC: return "PC";
+                case Register16.SP: return "SP";
+                default: return "Unknown register pair";
+            }
+        }
+
+        public static string FlagToString(Flag flag)
+        {
+            switch(flag)
+            {
+                case Flag.AddSub: return "N";
+                case Flag.Carry: return "C";
+                case Flag.HalfCarry: return "HC";
+                case Flag.Zero: return "Z";
+                default: return "Unknown flag";
+            }
+        }
     }
 }
