@@ -9,7 +9,7 @@
 ChromaBoy is an experimental emulator of the classic Nintendo GameBoy. *Eventually* it's planned to expand to GameBoy Color too, however, getting the classic up and running is the first priority. As I've never emulated the GameBoy before, this project may be prone to beginner's mistakes. If you do face any issues in the pre-release and release versions (once they're published), please report them through GitHub Issues.
 
 # Technical Details
-This project is the third Chroma-based emulator project, preceded by [Chroma Invaders](https://github.com/Hacktix/Chroma-Invaders) and [CHROMA-8](https://github.com/Hacktix/CHROMA-8). As to be expected by now, all video output is handled by built-in Chroma features. As audio is not the first priority at the moment, it's not sure which technology will be used, however, chances are I will use my own [ChromaSynth](https://github.com/Hacktix/ChromaSynth) library, which allows for more-or-less simple audio synthesis at runtime.
+This project is the third Chroma-based emulator project, preceded by [Chroma Invaders](https://github.com/Hacktix/Chroma-Invaders) and [CHROMA-8](https://github.com/Hacktix/CHROMA-8). As to be expected by now, all video output is handled by built-in Chroma features. The current Audio implementation uses my [ChromaSynth](https://github.com/Hacktix/ChromaSynth) library, but will be replaced by Gameboy-dedicated audio synthesis at some point.
 
 # ToDo-List
 ```
@@ -22,7 +22,7 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 [✓] MBC1
 [ ] MBC2
 [✓] MBC3
-[ ] MBC5
+[✓] MBC5
 [ ] MBC6
 [ ] MBC7
 [ ] HuC1
@@ -36,6 +36,8 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 [ ] Serial Data Transfer
 
 # Accessories
+[ ] Rumble Support
+[ ] Accelerometer Support
 [ ] Game Boy Printer
 [ ] Game Boy Camera
 [ ] Gamegenie / Gameshark Codes
