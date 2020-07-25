@@ -98,6 +98,12 @@ namespace ChromaBoy.Hardware
                 case 0x11: return new MBC3(0, ROM.Length, false, false);
                 case 0x12: return new MBC3(ExternalRAMSize, ROM.Length, false, false);
                 case 0x13: return new MBC3(ExternalRAMSize, ROM.Length, true, false);
+                case 0x19: return new MBC5(0, ROM.Length, false, false);
+                case 0x1A: return new MBC5(ExternalRAMSize, ROM.Length, false, false);
+                case 0x1B: return new MBC5(ExternalRAMSize, ROM.Length, true, false);
+                case 0x1C: return new MBC5(0, ROM.Length, false, true);
+                case 0x1D: return new MBC5(ExternalRAMSize, ROM.Length, false, true);
+                case 0x1E: return new MBC5(ExternalRAMSize, ROM.Length, true, true);
                 default: throw new NotImplementedException();
             }
         }
