@@ -79,6 +79,11 @@ namespace ChromaBoy
             }
         }
 
+        public static void VibrateControllers()
+        {
+            Controller.Vibrate(0, ushort.MaxValue, ushort.MaxValue, 40);
+        }
+
         protected override void ControllerAxisMoved(ControllerAxisEventArgs e)
         {
             if(e.Axis == ControllerAxis.LeftStickX || e.Axis == ControllerAxis.LeftStickY)

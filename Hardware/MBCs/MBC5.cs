@@ -80,7 +80,7 @@ namespace ChromaBoy.Hardware.MBCs
                 {
                     RAMBankNumber = value & 0b11110111;
                     RumbleActive = (value & 0b1000) != 0;
-                    // TODO: Handle Rumble Update
+                    if (RumbleActive) Emulator.VibrateControllers();
                 }
                 else RAMBankNumber = value;
             } else if(address >= 0xA000 && address <= 0xBFFF) {
