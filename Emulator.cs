@@ -1,6 +1,7 @@
 ﻿using Chroma;
 using Chroma.Audio;
 using Chroma.Graphics;
+using Chroma.Input;
 using Chroma.Input.EventArgs;
 using ChromaBoy.Hardware;
 using System;
@@ -75,6 +76,93 @@ namespace ChromaBoy
             {
                 Gameboy.EmulateCycles(CYCLES_PER_UPDATE);
                 UpdateWindowTitle();
+            }
+        }
+
+        protected override void ControllerAxisMoved(ControllerAxisEventArgs e)
+        {
+            if(e.Axis == ControllerAxis.LeftStickX || e.Axis == ControllerAxis.LeftStickY)
+            {
+                short x = Controller.GetAxisValue(e.Controller.PlayerIndex, ControllerAxis.LeftStickX);
+                short y = Controller.GetAxisValue(e.Controller.PlayerIndex, ControllerAxis.LeftStickY);
+
+                if(x > 10000)
+                {
+                    InputBits &= 0b11111110;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                } else if(x < -10000) {
+                    InputBits &= 0b11111101;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                } else {
+                    InputBits |= 0b00000001;
+                    InputBits |= 0b00000010;
+                }
+
+                if(y > 10000)
+                {
+                    InputBits &= 0b11110111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                } else if(y < -10000) {
+                    InputBits &= 0b11111011;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                } else {
+                    InputBits |= 0b00000100;
+                    InputBits |= 0b00001000;
+                }
+            }
+        }
+
+        protected override void ControllerButtonPressed(ControllerButtonEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case Chroma.Input.ControllerButton.DpadRight:
+                    InputBits &= 0b11111110;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.DpadLeft:
+                    InputBits &= 0b11111101;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.DpadUp:
+                    InputBits &= 0b11111011;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.DpadDown:
+                    InputBits &= 0b11110111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b10000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.A:
+                    InputBits &= 0b11101111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.B:
+                    InputBits &= 0b11011111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.View:
+                    InputBits &= 0b10111111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+                case Chroma.Input.ControllerButton.Menu:
+                    InputBits &= 0b01111111;
+                    if ((Gameboy.Memory.RAM[0xFF00] & 0b100000) == 0) Gameboy.Memory[0xFFFF] |= 0b10000;
+                    break;
+            }
+        }
+
+        protected override void ControllerButtonReleased(ControllerButtonEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case Chroma.Input.ControllerButton.DpadRight: InputBits |= 0b00000001; break;
+                case Chroma.Input.ControllerButton.DpadLeft: InputBits |= 0b00000010; break;
+                case Chroma.Input.ControllerButton.DpadUp: InputBits |= 0b00000100; break;
+                case Chroma.Input.ControllerButton.DpadDown: InputBits |= 0b00001000; break;
+                case Chroma.Input.ControllerButton.A: InputBits |= 0b00010000; break;
+                case Chroma.Input.ControllerButton.B: InputBits |= 0b00100000; break;
+                case Chroma.Input.ControllerButton.View: InputBits |= 0b01000000; break;
+                case Chroma.Input.ControllerButton.Menu: InputBits |= 0b10000000; break;
             }
         }
 
