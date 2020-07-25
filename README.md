@@ -33,10 +33,11 @@ This project is the third Chroma-based emulator project, preceded by [Chroma Inv
 [✓] Video Output
 [~] Sound Controller
 [✓] Joypad Controls
+[✓] Controller Support
 [ ] Serial Data Transfer
 
 # Accessories
-[ ] Rumble Support
+[✓] Rumble Support
 [ ] Accelerometer Support
 [ ] Game Boy Printer
 [ ] Game Boy Camera
