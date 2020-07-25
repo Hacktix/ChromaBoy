@@ -130,12 +130,12 @@ namespace ChromaBoy.Hardware
         #region Drawing
         private void ProcessDrawingCycle()
         {
-            if (lx == 0 && !drawingWindow && (parent.Memory.Get(0xFF40, true) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A, true) && parent.Memory.Get(0xFF4B, true) <= 7)
+            if (lx == 0 && !drawingWindow && (parent.Memory.Get(0xFF40, true) & 0b100000) != 0 && ly >= parent.Memory.Get(0xFF4A, true) && parent.Memory.Get(0xFF4B, true) <= 8)
                 drawingWindow = true;
 
             FetchBackgroundPixels(); // Tick background pixel fetcher
 
-            if(!fetchingSprite && fetchedFirstTile)
+            if(!fetchingSprite && fetchedFirstTile && (scrollShifted == (parent.Memory.Get(0xFF43, true) % 8) || drawingWindow))
                 CheckForSprite();
 
             if (fetchingSprite)
@@ -207,10 +207,14 @@ namespace ChromaBoy.Hardware
                     spriteTileData += (ushort)(parent.Memory.Get(highDataAddr, true) << 8);
                     break;
                 case 6: // Merge sprite pixels with FIFO
+                    int pixelCount = 0;
                     if(!fetchedSprite.HasAttribute(SpriteAttribute.XFlip))
                     {
                         for (ushort bmp = 0b1000000010000000, bit = 7; ; bmp >>= 1, bit--)
                         {
+                            if (fetchedSprite.X < 8 && bit >= fetchedSprite.X)
+                                continue;
+                            pixelCount++;
                             ushort tmp = (ushort)(spriteTileData & bmp);
                             FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
                             FifoPixel backgroundPixel = pixelFifo.Dequeue();
@@ -234,6 +238,9 @@ namespace ChromaBoy.Hardware
                     {
                         for (ushort bmp = 0b0000000100000001, bit = 0; ; bmp <<= 1, bit++)
                         {
+                            if (fetchedSprite.X < 8 && 7 - bit >= fetchedSprite.X)
+                                continue;
+                            pixelCount++;
                             ushort tmp = (ushort)(spriteTileData & bmp);
                             FifoPixel spritePixel = new FifoPixel((byte)(((tmp >> bit) & 0xFF) + ((tmp >> (bit + 7)) & 0xFF)), true, (byte)(!fetchedSprite.HasAttribute(SpriteAttribute.ZeroPalette) ? 0 : 1));
                             FifoPixel backgroundPixel = pixelFifo.Dequeue();
@@ -253,7 +260,7 @@ namespace ChromaBoy.Hardware
                         }
                     }
                     
-                    for (int i = 0; i < pixelFifo.Count - 8; i++)
+                    for (int i = 0; i < pixelFifo.Count - pixelCount; i++)
                         pixelFifo.Enqueue(pixelFifo.Dequeue());
                     CheckForSprite();
                     return;
