@@ -252,7 +252,7 @@ namespace ChromaBoy.Hardware
                 Memory[SP + 1] = (byte)((PC & 0xFF00) >> 8);
                 Memory[SP] = (byte)(PC & 0xFF);
                 PC = intVec;
-                CycleCooldown = 19;
+                CycleCooldown += 19;
             } else CallInterruptHandler = true;
         }
 

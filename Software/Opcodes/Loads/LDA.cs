@@ -12,6 +12,7 @@ namespace ChromaBoy.Software.Opcodes
             regpair = (opcode & 0b10000) > 0 ? Register16.DE : Register16.BC;
 
             Cycles = 8;
+            TickAccurate = true;
 
             Disassembly = load ? "ld a, [" + OpcodeUtils.Register16ToString(regpair) + "]" : "ld [" + OpcodeUtils.Register16ToString(regpair) + "], a";
         }
@@ -23,6 +24,12 @@ namespace ChromaBoy.Software.Opcodes
                 parent.Registers[Register.A] = srcVal;
             else
                 parent.Memory[parent.ReadRegister16(regpair)] = srcVal;
+        }
+
+        public override void ExecuteTick()
+        {
+            base.ExecuteTick();
+            if (Tick == 3) Execute();
         }
     }
 }

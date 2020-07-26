@@ -17,7 +17,7 @@ namespace ChromaBoy.Software.Opcodes
             Length = regC ? 1 : 2;
 
             TickAccurate = true;
-            actionTick = regC ? 2 : 4;
+            actionTick = regC ? 3 : 7;
 
             Disassembly = load ? "ld a, [$" + ((ushort)(0xFF00 + (regC ? parent.Registers[Register.C] : parent.Memory[parent.PC + 1]))).ToString("X4") + "]" : "ld [$" + ((ushort)(0xFF00 + (regC ? parent.Registers[Register.C] : parent.Memory[parent.PC + 1]))).ToString("X4") + "], a";
         }

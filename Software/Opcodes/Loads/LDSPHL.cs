@@ -6,6 +6,7 @@ namespace ChromaBoy.Software.Opcodes
     {
         public LDSPHL(Gameboy parent) : base(parent) {
             Cycles = 8;
+            TickAccurate = true;
 
             Disassembly = "ld sp, hl";
         }
@@ -13,6 +14,13 @@ namespace ChromaBoy.Software.Opcodes
         public override void Execute()
         {
             parent.WriteRegister16(Register16.SP, parent.ReadRegister16(Register16.HL));
+        }
+
+        public override void ExecuteTick()
+        {
+            base.ExecuteTick();
+            if (Tick == 3)
+                Execute();
         }
     }
 }

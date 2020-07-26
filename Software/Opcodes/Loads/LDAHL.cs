@@ -12,6 +12,7 @@ namespace ChromaBoy.Software.Opcodes
             load = (opcode & 0b1000) > 0;
 
             Cycles = 8;
+            TickAccurate = true;
 
             Disassembly = load ? "ld a, [hl" + (inc ? "+" : "-") + "]" : "ld [hl" + (inc ? "+" : "-") + "], a";
         }
@@ -24,6 +25,12 @@ namespace ChromaBoy.Software.Opcodes
             else
                 parent.Memory[(parent.Registers[Register.H] << 8) | (parent.Registers[Register.L])] = srcVal;
             parent.WriteRegister16(Register16.HL, (ushort)(parent.ReadRegister16(Register16.HL) + (inc ? 1 : -1)));
+        }
+
+        public override void ExecuteTick()
+        {
+            base.ExecuteTick();
+            if (Tick == 3) Execute();
         }
     }
 }

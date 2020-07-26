@@ -7,6 +7,7 @@ namespace ChromaBoy.Software.Opcodes
         public LDHLSP(Gameboy parent) : base(parent) {
             Cycles = 12;
             Length = 2;
+            TickAccurate = true;
 
             Disassembly = "ld hl, " + ((ushort)(parent.ReadRegister16(Register16.SP) + (sbyte)parent.Memory[parent.PC + 1])).ToString("X1");
         }
@@ -24,6 +25,12 @@ namespace ChromaBoy.Software.Opcodes
             parent.SetFlag(Flag.AddSub, false);
             parent.SetFlag(Flag.HalfCarry, (res & 0xF) < (orgVal & 0xF));
             parent.SetFlag(Flag.Carry, (res & 0xFF) < (orgVal & 0xFF));
+        }
+
+        public override void ExecuteTick()
+        {
+            base.ExecuteTick();
+            if (Tick == 7) Execute();
         }
     }
 }
